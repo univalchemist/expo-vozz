@@ -112,7 +112,7 @@ class Home extends Component {
         this.setState({ activeSwitch: val });
     }
     render() {
-        const { flag, featured, search, activeSwitch, tendencias, user, trend_experiences, trend_routes } = this.state;
+        const { flag, featured, search, activeSwitch, user, trend_experiences, trend_routes } = this.state;
         return (
             <Container style={{ paddingTop: StatusBar.currentHeight }}>
                 <Background height={200} end={'transparent'} />
@@ -120,12 +120,12 @@ class Home extends Component {
                     visible={flag}
                     textContent={""}
                 />
-                <SearchBarCustom
+                {/* <SearchBarCustom
                     round={true}
                     value={search}
                     onChangeText={this.updateSearch}
                     onClear={this._onTextClear}
-                    placeholder='Busca tu experiencia...' />
+                    placeholder='Busca tu experiencia...' /> */}
                 <Content contentContainerStyle={styles.contentStyle}>
 
                     <ScrollView

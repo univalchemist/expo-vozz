@@ -26,6 +26,7 @@ import { getCount, getPlays } from '../../utils/number';
 import { updatePlay, createPlay } from '../../utils/API/play';
 import { deleteLike, createLike } from '../../utils/API/likes';
 import { updateProfileStore } from '../../actions';
+import { errorAlert } from '../../utils/API/errorHandle';
 
 const BACKGROUND_COLOR = 'transparent';
 const LOADING_STRING = 'Loading...';
@@ -82,7 +83,8 @@ class ViewRoute extends Component {
             like: false,
             comments: 0,
             plays: 0,
-            likes: 0
+            likes: 0,
+            tapLike: false
         };
 
     }
@@ -106,7 +108,7 @@ class ViewRoute extends Component {
             let route = res.data.route;
             const like = this.contains(this.props.auth.user._id, route.likes)
             const comments = getCount(route.comments);
-            const plays = getCount(route.plays);
+            const plays = getPlays(route.plays);
             const likes = getCount(route.likes);
             this.setState({
                 route: route,
@@ -309,6 +311,7 @@ class ViewRoute extends Component {
         if (play.length != 0) {
             updatePlay(play[0]._id, this.props.auth.jwt, { count: play[0].count + 1 })
                 .then((res) => {
+                    this.props.dispatch(updateProfileStore(this.props.auth.user._id));
                 })
                 .catch((error) => {
                     console.log('updatePlayError:', error);
@@ -323,6 +326,7 @@ class ViewRoute extends Component {
             }
             createPlay(this.props.auth.jwt, temp_play)
                 .then((res) => {
+                    this.props.dispatch(updateProfileStore(this.props.auth.user._id));
                 })
                 .catch((error) => {
                     console.log('createPlayError:', error);
@@ -374,16 +378,27 @@ class ViewRoute extends Component {
 
     }
     onActionLike = () => {
-        const { like, likes, route } = this.state;
-
+        const { like, likes, route, tapLike } = this.state;
+        if (tapLike) return;
         if (like) {
-            let myLike = route.likes.filter(l => l.user._id == this.props.auth.user._id);
+            let myLike = this.props.auth.user.likes.filter(l => l.route == route._id);
+            if (myLike.length == 0) return;
+            this.setState({ tapLike: true });
             deleteLike(myLike[0]._id, this.props.auth.jwt)
                 .then((res) => {
+                    this.setState({
+                        like: !like,
+                        likes: like ? likes - 1 : likes + 1,
+                        tapLike: false
+                    });
                     this.props.dispatch(updateProfileStore(this.props.auth.user._id));
                 })
                 .catch((error) => {
-                    console.log('deleteLike:', error);
+                    let errorResponse = error.response.data;
+                    console.log('deleteLike error', JSON.stringify(errorResponse));
+                    let errorCode = errorResponse.statusCode;
+                    console.log({ errorCode })
+                    this.setState({ tapLike: false });
                     this.props.dispatch(updateProfileStore(this.props.auth.user._id));
                 })
         } else {
@@ -392,21 +407,37 @@ class ViewRoute extends Component {
                 route: route._id,
                 user: this.props.auth.user._id,
             }
+            this.setState({ tapLike: true });
             createLike(this.props.auth.jwt, temp_like)
                 .then((res) => {
+                    this.setState({
+                        like: !like,
+                        likes: like ? likes - 1 : likes + 1,
+                        tapLike: false
+                    });
                     this.props.dispatch(updateProfileStore(this.props.auth.user._id));
                 })
                 .catch((error) => {
+                    this.setState({ tapLike: false });
                     console.log('createPlayError:', error);
                 })
         }
-        this.setState({
-            like: !like,
-            likes: like ? likes - 1 : likes + 1
-        });
+
 
     }
     onActionComment = () => {
+        const { route, comments } = this.state;
+        this.props.navigation.navigate('Comment', { 
+            title: route.title, 
+            c_count: comments, 
+            route: route._id, 
+            comments: route.comments,
+            onGoBack: (c) => this.refresh(c),
+        });
+    }
+    refresh = (c) => {
+        const { comments } = this.state;
+        this.setState({ comments: c });
     }
     contains = (value, arr) => {
         var i = arr.length;

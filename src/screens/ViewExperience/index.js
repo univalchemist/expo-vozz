@@ -22,8 +22,10 @@ import { LabelView } from '../../components/labelView';
 import { GET_EXPERIENCE_QUERY } from '../../utils/Apollo/Queries/experience';
 import { getCount, getPlays } from '../../utils/number';
 import { deleteExperience } from '../../utils/API/experienceAction';
-import { updateProgressFlag } from '../../actions';
+import { updateProgressFlag, updateProfileStore } from '../../actions';
 import { updatePlay, createPlay } from '../../utils/API/play';
+import { deleteLike, createLike } from '../../utils/API/likes';
+import { errorAlert } from '../../utils/API/errorHandle';
 
 const BACKGROUND_COLOR = 'transparent';
 const LOADING_STRING = 'Loading...';
@@ -65,7 +67,8 @@ class ViewExperience extends Component {
             like: false,
             comments: 0,
             plays: 0,
-            likes: 0
+            likes: 0,
+            tapLike: false
         };
 
     }
@@ -89,7 +92,7 @@ class ViewExperience extends Component {
             let experience = res.data.experience;
             const like = this.contains(this.props.auth.user._id, experience.likes)
             const comments = getCount(experience.comments);
-            const plays = getCount(experience.plays);
+            const plays = getPlays(experience.plays);
             const likes = getCount(experience.likes);
             this.setState({
                 experience: experience,
@@ -279,6 +282,7 @@ class ViewExperience extends Component {
         if (play.length != 0) {
             updatePlay(play[0]._id, this.props.auth.jwt, { count: play[0].count + 1 })
                 .then((res) => {
+                    this.props.dispatch(updateProfileStore(this.props.auth.user._id));
                 })
                 .catch((error) => {
                     console.log('updatePlayError:', error);
@@ -292,12 +296,79 @@ class ViewExperience extends Component {
                 own_user: experience.user._id
             }
             createPlay(this.props.auth.jwt, temp_play)
-            .then((res) => {
-            })
-            .catch((error) => {
-                console.log('createPlayError:', error);
-            })
+                .then((res) => {
+                    this.props.dispatch(updateProfileStore(this.props.auth.user._id));
+                })
+                .catch((error) => {
+                    console.log('createPlayError:', error);
+                })
         }
+    }
+    onActionLike = () => {
+        const { like, likes, experience, tapLike } = this.state;
+        if (tapLike) return;
+        console.log('gogogo')
+        if (like) {
+            let myLike = this.props.auth.user.likes.filter(l => l.experience == experience._id);
+            if(myLike.length == 0) return;
+            this.setState({ tapLike: true });
+            deleteLike(myLike[0]._id, this.props.auth.jwt)
+                .then((res) => {
+                    this.setState({
+                        like: !like,
+                        likes: like ? likes - 1 : likes + 1,
+                        tapLike: false
+                    });
+                    this.props.dispatch(updateProfileStore(this.props.auth.user._id));
+                })
+                .catch((error) => {
+                    console.log('deleteLike:', error);
+                    this.props.dispatch(updateProfileStore(this.props.auth.user._id));
+                })
+        } else {
+            let temp_like = {
+                like_experience: true,
+                experience: experience._id,
+                user: this.props.auth.user._id,
+            }
+            this.setState({ tapLike: true });
+            createLike(this.props.auth.jwt, temp_like)
+                .then((res) => {
+                    this.setState({
+                        like: !like,
+                        likes: like ? likes - 1 : likes + 1,
+                        tapLike: false
+                    });
+                    this.props.dispatch(updateProfileStore(this.props.auth.user._id));
+                })
+                .catch((error) => {
+                    console.log('createPlayError:', error);
+                })
+        }
+
+    }
+    onActionComment = () => {
+        const { experience, comments } = this.state;
+        this.props.navigation.navigate('Comment', { 
+            title: experience.title, 
+            c_count: comments, 
+            experience: experience._id, 
+            comments: experience.comments,
+            onGoBack: (c) => this.refresh(c),
+        });
+    }
+    refresh = (c) => {
+        const { comments } = this.state;
+        this.setState({ comments: c });
+    }
+    contains = (value, arr) => {
+        var i = arr.length;
+        while (i--) {
+            if (arr[i].user._id === value) {
+                return true;
+            }
+        }
+        return false;
     }
     setMenuRef = ref => {
         this._menu = ref;
@@ -361,7 +432,8 @@ class ViewExperience extends Component {
 
     }
     onTapGoBack = async () => {
-        if(isLoading) {
+        const { isLoading } = this.state;
+        if (isLoading) {
             return;
         }
         if (this.playbackInstance != null) {
@@ -372,7 +444,7 @@ class ViewExperience extends Component {
         }
     }
     render() {
-        const { flag, isLoading, isPlaying, experience, me } = this.state;
+        const { flag, like, plays, comments, likes, isLoading, isPlaying, experience, me } = this.state;
         if (experience == null || experience == undefined) {
             return (
                 <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
@@ -421,27 +493,33 @@ class ViewExperience extends Component {
                             justifyContent: 'center',
                             alignItems: 'stretch',
                         }}>
-                            <View style={[styles.shadow, styles.infoCard]}>
-                                <Icon active type='Feather' name="message-circle" style={{ marginLeft: 0, marginRight: 2, color: 'red' }} />
-                                <View style={{ paddingHorizontal: 10, flex: 1 }}>
-                                    <Text style={{ fontSize: 12, fontFamily: FONT.BOOK }}>{getCount(experience.comments)}</Text>
-                                    <Text style={{ fontSize: 12, fontFamily: FONT.BOOK, color: 'red' }}>{'comments'}</Text>
+                            <TouchableHighlight underlayColor="#fff" style={[styles.shadow, styles.infoCard]} onPress={this.onActionComment}>
+                                <View style={[styles.infoCardContent]}>
+                                    <Icon active type='Feather' name="message-circle" style={{ marginLeft: 0, marginRight: 2, color: 'red' }} />
+                                    <View style={{ paddingHorizontal: 10, flex: 1 }}>
+                                        <Text style={{ fontSize: 12, fontFamily: FONT.BOOK }}>{comments}</Text>
+                                        <Text style={{ fontSize: 12, fontFamily: FONT.BOOK, color: 'red' }}>{'comments'}</Text>
+                                    </View>
                                 </View>
-                            </View>
-                            <View style={[styles.shadow, styles.infoCard]}>
-                                <Icon active type='Feather' name="heart" style={{ marginLeft: 0, marginRight: 2, color: 'red' }} />
-                                <View style={{ paddingHorizontal: 10, flex: 1 }}>
-                                    <Text style={{ fontSize: 12, fontFamily: FONT.BOOK }}>{getCount(experience.likes)}</Text>
-                                    <Text style={{ fontSize: 12, fontFamily: FONT.BOOK, color: 'red' }}>{'likes'}</Text>
+                            </TouchableHighlight>
+                            <TouchableHighlight underlayColor="#fff" style={[styles.shadow, styles.infoCard]} onPress={this.onActionLike}>
+                                <View style={[styles.infoCardContent]}>
+                                    <Icon active type={like ? 'FontAwesome' : 'Feather'} name={'heart'} style={{ marginLeft: 0, marginRight: 2, color: 'red' }} />
+                                    <View style={{ paddingHorizontal: 10, flex: 1 }}>
+                                        <Text style={{ fontSize: 12, fontFamily: FONT.BOOK }}>{likes}</Text>
+                                        <Text style={{ fontSize: 12, fontFamily: FONT.BOOK, color: 'red' }}>{'likes'}</Text>
+                                    </View>
                                 </View>
-                            </View>
-                            <View style={[styles.shadow, styles.infoCard]}>
-                                <Icon active type='Feather' name="bar-chart-2" style={{ marginLeft: 0, marginRight: 2, color: 'red' }} />
-                                <View style={{ paddingHorizontal: 10, flex: 1 }}>
-                                    <Text style={{ fontSize: 12, fontFamily: FONT.BOOK }}>{getPlays(experience.plays)}</Text>
-                                    <Text style={{ fontSize: 12, fontFamily: FONT.BOOK, color: 'red' }}>{'plays'}</Text>
+                            </TouchableHighlight>
+                            <TouchableHighlight underlayColor="#fff" style={[styles.shadow, styles.infoCard]}>
+                                <View style={[styles.infoCardContent]}>
+                                    <Icon active type='Feather' name="bar-chart-2" style={{ marginLeft: 0, marginRight: 2, color: 'red' }} />
+                                    <View style={{ paddingHorizontal: 10, flex: 1 }}>
+                                        <Text style={{ fontSize: 12, fontFamily: FONT.BOOK }}>{plays}</Text>
+                                        <Text style={{ fontSize: 12, fontFamily: FONT.BOOK, color: 'red' }}>{'plays'}</Text>
+                                    </View>
                                 </View>
-                            </View>
+                            </TouchableHighlight>
                         </View>
                         <View style={{ width: '100%', marginTop: 40, marginBottom: 35 }}>
                             <TextView style={{ color: 'white', fontSize: 26, textAlign: 'center' }} value={experience.title} />

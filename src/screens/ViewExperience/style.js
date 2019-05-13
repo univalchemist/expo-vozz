@@ -101,6 +101,10 @@ export const styles = StyleSheet.create({
         width: '31%', height: 45,
         backgroundColor: 'white',
         marginHorizontal: 2, borderRadius: 5,
+        justifyContent: 'center',
+        alignItems: 'center'
+    },
+    infoCardContent: {
         paddingLeft: 5, flexDirection: 'row',
         justifyContent: 'center',
         alignItems: 'center'

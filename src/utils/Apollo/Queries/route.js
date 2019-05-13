@@ -22,7 +22,7 @@ export const GET_ROUTE_QUERY = gql`query route($id: ID!) {
       image{url}
       user{_id, username}
       markers
-      comments{_id, message, user{_id, username}}
+      comments{_id, message, user{_id, username, profile_base64}}
       likes{_id, user{_id}, route{_id}}
       tags{_id, name}
       plays{_id, user{_id, username}, route{_id}, own_user, count}

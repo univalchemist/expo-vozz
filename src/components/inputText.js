@@ -12,7 +12,9 @@ export const InputText = (props) => (
         keyboardType={props.keyboardType}
         secureTextEntry={props.secureTextEntry}
         placeholder={props.placeholder}
-        onChangeText={props.onChangeText} />
+        onChangeText={props.onChangeText}
+        onSubmitEditing={props.onSubmitEditing}
+        clearButtonMode="while-editing" />
 );
 
 

@@ -19,8 +19,7 @@ export const USER_QUERY = gql`query user($id: ID!) {
         followedBys{_id}
         routes{_id, title, description, image{url}, comments{_id}, plays{_id}, moments{_id}, tags{_id}, likes{_id}, plays{_id, count}}
         categories{_id}
-        likes_route{_id}
-        likes_experience{_id}
+        likes{_id}
         plays{_id}
       }
 }`;
@@ -85,7 +84,7 @@ export const TRENDS_QUERY = gql`query user($id: ID!) {
           comments{_id}, 
           likes{_id}, 
           tags{_id}, 
-          plays{_id}, 
+          plays{_id, count}
           moments{_id},
           user{_id, username},
           createdAt,
@@ -99,7 +98,7 @@ export const TRENDS_QUERY = gql`query user($id: ID!) {
           comments{_id}, 
           likes{_id}, 
           tags{_id}, 
-          plays{_id}, 
+          plays{_id, count}
           moments{_id},
           user{_id, username},
           createdAt,

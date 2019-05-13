@@ -18,6 +18,7 @@ import { withApollo } from 'react-apollo';
 import { USERS_QUERY, USERS_SEARCH_QUERY } from '../../utils/Apollo/Queries/user';
 import { ROUTES_QUERY, ROUTES_SEARCH_QUERY } from '../../utils/Apollo/Queries/route';
 import { EXPERIENCES_QUERY, EXPERIENCES_SEARCH_QUERY } from '../../utils/Apollo/Queries/experience';
+import { errorAlert } from '../../utils/API/errorHandle';
 
 let SCREEN_WIDTH = Dimensions.get('window').width
 class Search extends Component {
@@ -42,7 +43,6 @@ class Search extends Component {
   }
   searchCreator_Route_Experience = async () => {
     const { search } = this.state;
-    console.log({ search });
     this.props.dispatch(updateProgressFlag(true));
     try {
       let res_users = await this.props.client.query({ query: search == '' ? USERS_QUERY : USERS_SEARCH_QUERY, fetchPolicy: 'network-only', variables: { search: search } });

@@ -5,6 +5,9 @@ import { FONT } from '../constants/style';
 import { TextView } from './textView';
 import images from '../../assets';
 const goback = (props) => {
+    if(props.customGoBack) {
+        props.GoBack();
+    }
     if (props.player != null) {
         props.player.stopPlay(true)
     }

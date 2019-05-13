@@ -29,6 +29,7 @@ import Settings from '../screens/Settings';
 import AudioLibrary from '../screens/AudioLibrary';
 import EditProfile from '../screens/EditProfile';
 import ViewCategory from '../screens/ViewCategory';
+import Comment from '../screens/Comment';
 
 const StackAuth = createStackNavigator(
   {
@@ -55,7 +56,8 @@ const StackHome = createStackNavigator(
     ViewRoute: ViewRoute,
     ViewExperience: ViewExperience,
     UserProfile: UserProfile,
-    ViewCategory: ViewCategory
+    ViewCategory: ViewCategory,
+    Comment: Comment
   }, { headerMode: 'none' })
 StackHome.navigationOptions = ({ navigation }) => {
   let tabBarVisible;
@@ -79,8 +81,8 @@ const StackSearch = createStackNavigator({
   UserProfile: UserProfile,
   Chat: Chat,
   ViewRoute: ViewRoute,
-  ViewExperience: ViewExperience
-
+  ViewExperience: ViewExperience,
+  Comment: Comment
 }, { headerMode: 'none' })
 StackSearch.navigationOptions = ({ navigation }) => {
   let tabBarVisible;
