@@ -155,7 +155,7 @@ class Comment extends Component {
                             value={comment}
                         />
                     </View>
-                    {Platform.OS == 'android' && <KeyboardAvoidingView behavior={'padding'} keyboardVerticalOffset={80} />}
+                    <KeyboardAvoidingView behavior={'padding'} keyboardVerticalOffset={80} />
                 </View>
             </Container>
         )

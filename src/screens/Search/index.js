@@ -82,7 +82,7 @@ class Search extends Component {
 
     this.setState({
       typing: false,
-      search,
+      search: search.toLowerCase(),
       typingTimeout: setTimeout(() => {
         this.searchCreator_Route_Experience()
       }, 2000)

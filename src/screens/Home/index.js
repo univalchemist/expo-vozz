@@ -143,7 +143,7 @@ class Home extends Component {
                             />
                         } style={{ flex: 1 }}>
                         {featured.length > 0 &&
-                            <View style={{ height: 250, marginTop: 10, width: SCREEN_WIDTH - 50 }}>
+                            <View style={{ height: 250, marginTop: 30, width: SCREEN_WIDTH - 50 }}>
 
                                 <Swiper
                                     activeDotColor={PRIMARYCOLOR.PURPLE}

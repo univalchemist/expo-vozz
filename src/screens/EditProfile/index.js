@@ -4,14 +4,12 @@ import { Container, Content, Item, ListItem, Left, Body, Right, Icon, Textarea, 
 import { Permissions, ImagePicker } from 'expo';
 import Spinner from 'react-native-loading-spinner-overlay';
 import { connect } from 'react-redux';
-import { SwipeListView } from 'react-native-swipe-list-view';
 import ActionSheet from 'react-native-actionsheet';
 import DatePicker from 'react-native-datepicker';
 import { Dropdown } from 'react-native-material-dropdown';
 import CountryPicker, {
     getAllCountries
 } from 'react-native-country-picker-modal';
-import DeviceInfo from 'react-native-device-info'
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 import { styles } from './style';
@@ -42,18 +40,8 @@ const cancelButtonIndex_ios = options_ios.length - 1;
 class EditProfile extends Component {
     constructor(props) {
         super(props);
-        let userLocaleCountryCode = DeviceInfo.getDeviceCountry()
-        const userCountryData = getAllCountries()
-            .filter(country => country.cca2 === userLocaleCountryCode)
-            .pop()
-        let callingCode = null
-        let cca2 = userLocaleCountryCode
-        if (!cca2 || !userCountryData) {
-            cca2 = 'ES'
-            callingCode = '34'
-        } else {
-            callingCode = userCountryData.callingCode
-        }
+        let callingCode = 34
+        let cca2 = 'ES'
 
         this.state = {
             flag: false,
