@@ -88,9 +88,12 @@ class AddDetailExperience extends Component {
         })
         let temp_tags = [];
         records.map(record => {
-            record.item.tags.map(tag => {
-                temp_tags.push(tag._id);
-            });
+            record.item.tags ?
+                record.item.tags.map(tag => {
+                    temp_tags.push(tag._id);
+                })
+                :
+                null;
         });
         console.log({ temp_tags });
         const output = [...new Map(temp_tags.map(o => [o, o])).values()]

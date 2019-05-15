@@ -6,6 +6,6 @@ const images = {
     trash: require('./trash.png'),
     flag_blue: require('./flag-blue.png'),
     flag_pink: require('./flag-pink.png'),
-    
+    placeHolderMoment: require('./placeholder_moment.jpg'),
 }
 export default images;

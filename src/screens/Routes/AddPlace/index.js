@@ -11,15 +11,7 @@ import { connect } from 'react-redux';
 import Slider from 'react-native-slider';
 
 import {
-    BallIndicator,
-    BarIndicator,
-    DotIndicator,
-    MaterialIndicator,
-    PacmanIndicator,
-    PulseIndicator,
     SkypeIndicator,
-    UIActivityIndicator,
-    WaveIndicator
 } from 'react-native-indicators';
 
 import { styles } from './style';
@@ -313,9 +305,12 @@ class AddPlace extends Component {
         })
         let temp_tags = [];
         records.map(record => {
+            record.item.tags?
             record.item.tags.map(tag => {
                 temp_tags.push(tag._id);
-            });
+            })
+            :
+            null;
         });
         console.log({ temp_tags});
         const output = [...new Map(temp_tags.map(o => [o, o])).values()]

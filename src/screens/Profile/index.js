@@ -1,5 +1,5 @@
 import React from 'react'
-import { Text, View, Dimensions, Image, Animated, SafeAreaView, Alert, AsyncStorage, TouchableOpacity, ScrollView, Platform, ActionSheetIOS } from 'react-native';
+import { Text, View, Dimensions, Image, Animated, ImageBackground, Alert, AsyncStorage, TouchableOpacity, ScrollView, Platform, ActionSheetIOS } from 'react-native';
 import { Button, Icon, Container, Content } from 'native-base';
 import { connect } from 'react-redux';
 import { withApollo } from 'react-apollo'
@@ -388,7 +388,7 @@ class Profile extends React.Component {
                     destructiveButtonIndex={4}
                     onPress={(index) => this.selectOption(index)}
                 />
-                <Animated.View style={[{ top: -50, zIndex: transParentZindex}]} >
+                <Animated.View style={[{ top: -50, zIndex: transParentZindex }]} >
                     <Background start={'#2a2d33'} end={'transparent'} height={150} />
                 </Animated.View>
                 <Animated.View style={[styles.menuIcon, { transform }]}>
@@ -405,16 +405,17 @@ class Profile extends React.Component {
                         </Menu>
                     </TouchableOpacity>
                 </Animated.View>
-                <Swiper style={styles.swiperStyle} index={0} paginationStyle={{ bottom: 288 }} activeDotColor='#fff'>
-                    <View style={{ flex: 1 }}>
-                        <Image resizeMode="cover" style={{ flex: 1 }} source={{ uri: 'https://images.pexels.com/photos/1250643/pexels-photo-1250643.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260' }} />
-                        {/* <Text>TEST</Text> */}
-                    </View>
-                    <View style={{ flex: 1 }}>
-                        <Image resizeMode="cover" style={{ flex: 1 }} source={{ uri: 'https://images.pexels.com/photos/1262357/pexels-photo-1262357.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260' }} />
-                        {/* <Text>TEST 2</Text> */}
-                    </View>
-                </Swiper>
+                <ImageBackground style={styles.swiperStyle} resizeMode="cover" source={images.placeHolderMoment}>
+                    <Swiper style={styles.swiperStyle} index={0} paginationStyle={{ bottom: ((Dimensions.get('screen').height / Dimensions.get('screen').width) === (37 / 18)) ? 265 : 313 }} activeDotColor={PRIMARYCOLOR.ORANGE} dotColor='#fff'>
+                        <View style={{ flex: 1, position: 'absolute', left: 10, bottom: ((Dimensions.get('screen').height / Dimensions.get('screen').width) === (37 / 18)) ? 265 : 313 }}>
+                            <Text style={{ color: 'white'}}>TEST</Text>
+                        </View>
+                        <View style={{ flex: 1, position: 'absolute', left: 10, bottom: ((Dimensions.get('screen').height / Dimensions.get('screen').width) === (37 / 18)) ? 265 : 313 }}>
+                            <Text style={{ color: 'white'}}>TEST 2</Text>
+                        </View>
+                    </Swiper>
+                </ImageBackground>
+
 
                 <LinearGradient
                     style={{ height: 100, marginTop: -100 }}
