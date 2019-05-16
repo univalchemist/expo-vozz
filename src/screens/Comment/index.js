@@ -105,7 +105,6 @@ class Comment extends Component {
         this.setState({ comment });
     }
     GoBack = () => {
-        console.log('><><><><><><><><>');
         const { c_count } = this.state;
         this.props.navigation.state.params.onGoBack(c_count);
         this.props.navigation.goBack()

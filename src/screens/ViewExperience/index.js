@@ -61,6 +61,7 @@ class ViewExperience extends Component {
 
             experience_id: this.props.navigation.getParam('experience_id'),
             experience: null,
+            moments: [],
             musicCount: 0,
             index: 0,
 
@@ -90,12 +91,15 @@ class ViewExperience extends Component {
         try {
             let res = await this.props.client.query({ query: GET_EXPERIENCE_QUERY, fetchPolicy: 'network-only', variables: { id: experience_id } });
             let experience = res.data.experience;
+            let moments = experience.moments;
+            moments.map((m, index) => index == 0 ? m.play = true : m.play = false);
             const like = this.contains(this.props.auth.user._id, experience.likes)
             const comments = getCount(experience.comments);
             const plays = getPlays(experience.plays);
             const likes = getCount(experience.likes);
             this.setState({
                 experience: experience,
+                moments: moments,
                 musicCount: experience.moments.length,
                 like,
                 comments,
@@ -163,11 +167,12 @@ class ViewExperience extends Component {
     };
 
     _advanceIndex(forward) {
-        const { index, musicCount } = this.state;
+        const { index, musicCount, moments } = this.state;
         let i =
             (index + (forward ? 1 : musicCount - 1)) %
             musicCount;
-        this.setState({ index: i });
+        moments.map((m, index) => index == i ? m.play = true : m.play = false);
+        this.setState({ index: i, moments });
     }
 
     async _updatePlaybackInstanceForIndex(playing) {
@@ -310,7 +315,7 @@ class ViewExperience extends Component {
         console.log('gogogo')
         if (like) {
             let myLike = this.props.auth.user.likes.filter(l => l.experience == experience._id);
-            if(myLike.length == 0) return;
+            if (myLike.length == 0) return;
             this.setState({ tapLike: true });
             deleteLike(myLike[0]._id, this.props.auth.jwt)
                 .then((res) => {
@@ -349,10 +354,10 @@ class ViewExperience extends Component {
     }
     onActionComment = () => {
         const { experience, comments } = this.state;
-        this.props.navigation.navigate('Comment', { 
-            title: experience.title, 
-            c_count: comments, 
-            experience: experience._id, 
+        this.props.navigation.navigate('Comment', {
+            title: experience.title,
+            c_count: comments,
+            experience: experience._id,
             comments: experience.comments,
             onGoBack: (c) => this.refresh(c),
         });
@@ -443,8 +448,28 @@ class ViewExperience extends Component {
             this.props.navigation.goBack()
         }
     }
+    renderItem = ({ item, index }) => {
+        const { playIndex } = this.state;
+        return (
+            <ListItem icon button={true}>
+                <Left>
+                    <Icon name={'menu'} type='Feather' style={{ color: 'grey' }} />
+                </Left>
+                <Body>
+                    <TextView value={item.title} />
+                </Body>
+                <Right>
+                    {item.play ?
+                        <Icon active type='Feather' name="bar-chart-2" style={{ color: PRIMARYCOLOR.PURPLE }} />
+                        : null
+                    }
+                </Right>
+            </ListItem>
+        )
+
+    }
     render() {
-        const { flag, like, plays, comments, likes, isLoading, isPlaying, experience, me } = this.state;
+        const { flag, like, plays, comments, likes, isLoading, isPlaying, experience, me, moments } = this.state;
         if (experience == null || experience == undefined) {
             return (
                 <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
@@ -572,26 +597,10 @@ class ViewExperience extends Component {
                     <View style={{ flex: 2 }}>
                         <List>
                             <FlatList
-                                data={experience.moments}
-                                renderItem={({ item, index }) => (
-                                    <ListItem icon button={true} onPress={() => this.onClickItem(item, index)}>
-                                        <Left>
-                                            <Icon name={'menu'} type='Feather' style={{ color: 'grey' }} />
-                                        </Left>
-                                        <Body>
-                                            <TextView value={item.title} />
-                                        </Body>
-                                        <Right>
-                                            {this.state.index == index && this.playbackInstance != null &&
-                                                <Icon active type='Feather' name="bar-chart-2" style={{ color: PRIMARYCOLOR.PURPLE }} />
-                                            }
-
-                                        </Right>
-                                    </ListItem>
-
-                                )
-                                }
-                                keyExtractor={(item) => item.title}
+                                data={moments}
+                                renderItem={this.renderItem}
+                                keyExtractor={(item) => item._id}
+                                extraData={this.state}
                             />
                         </List>
                     </View>

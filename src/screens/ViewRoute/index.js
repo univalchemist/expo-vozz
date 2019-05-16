@@ -77,6 +77,7 @@ class ViewRoute extends Component {
 
             route_id: this.props.navigation.getParam('route_id'),
             route: null,
+            moments: [],
             musicCount: 0,
             playIndex: 0,
 
@@ -106,11 +107,14 @@ class ViewRoute extends Component {
         try {
             let res = await this.props.client.query({ query: GET_ROUTE_QUERY, fetchPolicy: 'network-only', variables: { id: route_id } });
             let route = res.data.route;
+            let moments = route.moments;
+            moments.map((m, index) => index == 0 ? m.play = true : m.play = false);
             const like = this.contains(this.props.auth.user._id, route.likes)
             const comments = getCount(route.comments);
             const plays = getPlays(route.plays);
             const likes = getCount(route.likes);
             this.setState({
+                moments: moments,
                 route: route,
                 musicCount: route.moments.length,
                 like,
@@ -177,11 +181,12 @@ class ViewRoute extends Component {
     };
 
     _advanceIndex(forward) {
-        const { playIndex, musicCount } = this.state;
+        const { playIndex, musicCount, moments } = this.state;
         let i =
             (playIndex + (forward ? 1 : musicCount - 1)) %
             musicCount;
-        this.setState({ playIndex: i });
+        moments.map((m, index) => index == i ? m.play = true : m.play = false);
+        this.setState({ playIndex: i, moments: moments });
 
     }
 
@@ -459,17 +464,17 @@ class ViewRoute extends Component {
                     <TextView value={item.title} />
                 </Body>
                 <Right>
-                    {/* {playIndex == 0 ?
+                    {item.play ?
                         <Icon active type='Feather' name="bar-chart-2" style={{ color: PRIMARYCOLOR.PURPLE }} />
                         : null
-                    } */}
+                    }
                 </Right>
             </ListItem>
         )
 
     }
     render() {
-        const { flag, like, plays, comments, likes, isLoading, isPlaying, region, me, route, playIndex } = this.state;
+        const { flag, like, plays, comments, likes, isLoading, isPlaying, region, me, route, moments } = this.state;
         if (route == null || route == undefined) {
             return (
                 <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
@@ -623,9 +628,10 @@ class ViewRoute extends Component {
                     <View style={{ flex: 1.2 }}>
                         <List>
                             <FlatList
-                                data={route.moments}
+                                data={moments}
                                 renderItem={this.renderItem}
                                 keyExtractor={(item) => item._id}
+                                extraData={this.state}
                             />
                         </List>
                     </View>
