@@ -1,5 +1,5 @@
 import React from 'react'
-import { Text, View, Dimensions, Image, Animated, AsyncStorage, TouchableOpacity, ScrollView, Platform } from 'react-native';
+import { Text, View, Dimensions, ImageBackground, Animated, AsyncStorage, TouchableOpacity, ScrollView, Platform } from 'react-native';
 import { Icon, Container } from 'native-base';
 import { connect } from 'react-redux';
 import Swiper from 'react-native-swiper';
@@ -126,15 +126,16 @@ class UserProfile extends React.Component {
         this._menu.hide();
         console.log('menuTapBlock');
     }
-    onTapEditProfile = () => {
+    onTapFollow = () => {
         const { following, user } = this.state;
         console.log('onTapEditProfile:', following);
-        if (following) {
-            return;
-        }
-        let followings = this.props.auth.user.followings?this.props.auth.user.followings.map(f => f._id):[];
+        let followings = this.props.auth.user.followings ? this.props.auth.user.followings.map(f => f._id) : [];
         console.log({ followings });
-        followings.push(user._id);
+        if (following) {
+            followings = followings.filter(f => f !== user._id)
+        } else {
+            followings.push(user._id);
+        }
         this.props.dispatch(updateProgressFlag(true));
         updateProfile(this.props.auth.user._id, this.props.auth.jwt, { followings: followings })
             .then((response) => {
@@ -264,22 +265,22 @@ class UserProfile extends React.Component {
                             button={<Text></Text>}
                         >
                             <MenuItem textStyle={{ fontFamily: FONT.MEDIUM }} onPress={this.menuTapPrivateMessage}>Private Message</MenuItem>
-                            <MenuItem textStyle={{ fontFamily: FONT.MEDIUM }} onPress={this.menuTapCopyUrl}>Copy Profile URL</MenuItem>
-                            <MenuItem textStyle={{ fontFamily: FONT.MEDIUM, color: 'red' }} onPress={this.menuTapReport}>Report</MenuItem>
-                            <MenuItem textStyle={{ fontFamily: FONT.MEDIUM, color: 'red' }} onPress={this.menuTapBlock}>Block</MenuItem>
+                            {/* <MenuItem textStyle={{ fontFamily: FONT.MEDIUM }} onPress={this.menuTapCopyUrl}>Copy Profile URL</MenuItem> */}
+                            {/* <MenuItem textStyle={{ fontFamily: FONT.MEDIUM, color: 'red' }} onPress={this.menuTapReport}>Report</MenuItem> */}
+                            {/* <MenuItem textStyle={{ fontFamily: FONT.MEDIUM, color: 'red' }} onPress={this.menuTapBlock}>Block</MenuItem> */}
                         </Menu>
                     </TouchableOpacity>
                 </Animated.View>
-                <Swiper style={styles.swiperStyle} index={0} paginationStyle={{ bottom: 288 }} activeDotColor='#fff'>
-                    <View style={{ flex: 1 }}>
-                        <Image resizeMode="cover" style={{ flex: 1 }} source={{ uri: 'https://images.pexels.com/photos/1250643/pexels-photo-1250643.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260' }} />
-                        {/* <Text>TEST</Text> */}
-                    </View>
-                    <View style={{ flex: 1 }}>
-                        <Image resizeMode="cover" style={{ flex: 1 }} source={{ uri: 'https://images.pexels.com/photos/1262357/pexels-photo-1262357.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260' }} />
-                        {/* <Text>TEST 2</Text> */}
-                    </View>
-                </Swiper>
+                <ImageBackground style={styles.swiperStyle} resizeMode="cover" source={images.placeHolderMoment}>
+                    <Swiper style={styles.swiperStyle} index={0} paginationStyle={{ bottom: ((Dimensions.get('screen').height / Dimensions.get('screen').width) === (37 / 18)) ? 265 : 313 }} activeDotColor={PRIMARYCOLOR.ORANGE} dotColor='#fff'>
+                        <View style={{ flex: 1, position: 'absolute', left: 10, bottom: ((Dimensions.get('screen').height / Dimensions.get('screen').width) === (37 / 18)) ? 265 : 313 }}>
+                            <Text style={{ color: 'white' }}>{'1 hour ago'}</Text>
+                        </View>
+                        <View style={{ flex: 1, position: 'absolute', left: 10, bottom: ((Dimensions.get('screen').height / Dimensions.get('screen').width) === (37 / 18)) ? 265 : 313 }}>
+                            <Text style={{ color: 'white' }}>{'2 hours ago'}</Text>
+                        </View>
+                    </Swiper>
+                </ImageBackground>
 
                 <LinearGradient
                     style={{ height: 100, marginTop: -100 }}
@@ -329,9 +330,9 @@ class UserProfile extends React.Component {
                                                 <Animated.View style={[{ marginTop: buttonMarginTop, width: headerName, marginLeft: 20, flex: 1 }]} {...dragHandler}>
                                                     <Animated.Text style={{ color: '#FFF', fontSize: headerFontSize, fontFamily: FONT.MEDIUM }}>{user.username}</Animated.Text>
                                                 </Animated.View>
-                                                <Animated.View style={[styles.followButton, { marginTop: buttonMarginTop, marginRight: buttonMarginRight, width: buttonWidth }]}>
-                                                    <TouchableOpacity onPress={() => this.onTapEditProfile()}>
-                                                        <TextView style={{ color: '#FF4710' }} value={following ? 'Following' : 'Follow'} />
+                                                <Animated.View style={[styles.followButton, { backgroundColor: following ? PRIMARYCOLOR.PURPLE : 'white', marginTop: buttonMarginTop, marginRight: buttonMarginRight, width: buttonWidth }]}>
+                                                    <TouchableOpacity onPress={() => this.onTapFollow()}>
+                                                        <TextView style={{ color: following ? '#fff' : '#FF4710' }} value={following ? 'Following' : 'Follow'} />
                                                     </TouchableOpacity>
                                                 </Animated.View>
                                             </View>

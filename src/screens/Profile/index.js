@@ -408,10 +408,10 @@ class Profile extends React.Component {
                 <ImageBackground style={styles.swiperStyle} resizeMode="cover" source={images.placeHolderMoment}>
                     <Swiper style={styles.swiperStyle} index={0} paginationStyle={{ bottom: ((Dimensions.get('screen').height / Dimensions.get('screen').width) === (37 / 18)) ? 265 : 313 }} activeDotColor={PRIMARYCOLOR.ORANGE} dotColor='#fff'>
                         <View style={{ flex: 1, position: 'absolute', left: 10, bottom: ((Dimensions.get('screen').height / Dimensions.get('screen').width) === (37 / 18)) ? 265 : 313 }}>
-                            <Text style={{ color: 'white'}}>TEST</Text>
+                            <Text style={{ color: 'white'}}>{'1 hour ago'}</Text>
                         </View>
                         <View style={{ flex: 1, position: 'absolute', left: 10, bottom: ((Dimensions.get('screen').height / Dimensions.get('screen').width) === (37 / 18)) ? 265 : 313 }}>
-                            <Text style={{ color: 'white'}}>TEST 2</Text>
+                            <Text style={{ color: 'white'}}>{'2 hours ago'}</Text>
                         </View>
                     </Swiper>
                 </ImageBackground>

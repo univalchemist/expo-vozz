@@ -78,7 +78,7 @@ class ViewRoute extends Component {
             route_id: this.props.navigation.getParam('route_id'),
             route: null,
             musicCount: 0,
-            index: 0,
+            playIndex: 0,
 
             like: false,
             comments: 0,
@@ -132,8 +132,8 @@ class ViewRoute extends Component {
             this.playbackInstance.setOnPlaybackStatusUpdate(null);
             this.playbackInstance = null;
         }
-        const { route, index } = this.state;
-        const source = { uri: route.moments[index].audio.url };
+        const { route, playIndex } = this.state;
+        const source = { uri: route.moments[playIndex].audio.url };
         const initialStatus = {
             shouldPlay: playing,
             rate: this.state.rate,
@@ -177,11 +177,11 @@ class ViewRoute extends Component {
     };
 
     _advanceIndex(forward) {
-        const { index, musicCount } = this.state;
+        const { playIndex, musicCount } = this.state;
         let i =
-            (index + (forward ? 1 : musicCount - 1)) %
+            (playIndex + (forward ? 1 : musicCount - 1)) %
             musicCount;
-        this.setState({ index: i });
+        this.setState({ playIndex: i });
 
     }
 
@@ -427,10 +427,10 @@ class ViewRoute extends Component {
     }
     onActionComment = () => {
         const { route, comments } = this.state;
-        this.props.navigation.navigate('Comment', { 
-            title: route.title, 
-            c_count: comments, 
-            route: route._id, 
+        this.props.navigation.navigate('Comment', {
+            title: route.title,
+            c_count: comments,
+            route: route._id,
             comments: route.comments,
             onGoBack: (c) => this.refresh(c),
         });
@@ -448,8 +448,28 @@ class ViewRoute extends Component {
         }
         return false;
     }
+    renderItem = ({ item, index }) => {
+        const { playIndex } = this.state;
+        return (
+            <ListItem icon button={true}>
+                <Left>
+                    <Icon name={'menu'} type='Feather' style={{ color: 'grey' }} />
+                </Left>
+                <Body>
+                    <TextView value={item.title} />
+                </Body>
+                <Right>
+                    {/* {playIndex == 0 ?
+                        <Icon active type='Feather' name="bar-chart-2" style={{ color: PRIMARYCOLOR.PURPLE }} />
+                        : null
+                    } */}
+                </Right>
+            </ListItem>
+        )
+
+    }
     render() {
-        const { flag, like, plays, comments, likes, isLoading, isPlaying, region, me, route } = this.state;
+        const { flag, like, plays, comments, likes, isLoading, isPlaying, region, me, route, playIndex } = this.state;
         if (route == null || route == undefined) {
             return (
                 <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
@@ -473,9 +493,9 @@ class ViewRoute extends Component {
                         ref={this.setMenuRef}
                         button={<Text></Text>}
                     >
-                        <MenuItem textStyle={{ fontFamily: FONT.MEDIUM }} onPress={this.menuTapViewStats}>View stats</MenuItem>
+                        {/* <MenuItem textStyle={{ fontFamily: FONT.MEDIUM }} onPress={this.menuTapViewStats}>View stats</MenuItem> */}
                         {!me && <MenuItem textStyle={{ fontFamily: FONT.MEDIUM }} onPress={this.menuTapGoProfile}>{'Profile'}</MenuItem>}
-                        <MenuItem textStyle={{ fontFamily: FONT.MEDIUM, color: 'red' }} onPress={this.menuTapDeleteReportRoute}>{me ? 'Delete Route' : 'Report'}</MenuItem>
+                        {/* <MenuItem textStyle={{ fontFamily: FONT.MEDIUM, color: 'red' }} onPress={this.menuTapDeleteReportRoute}>{me ? 'Delete Route' : 'Report'}</MenuItem> */}
 
                     </Menu>
                 </TouchableOpacity>
@@ -604,24 +624,7 @@ class ViewRoute extends Component {
                         <List>
                             <FlatList
                                 data={route.moments}
-                                renderItem={({ item, index }) => (
-                                    <ListItem icon button={true} onPress={() => this.onClickItem(item, index)}>
-                                        <Left>
-                                            <Icon name={'menu'} type='Feather' style={{ color: 'grey' }} />
-                                        </Left>
-                                        <Body>
-                                            <TextView value={item.title} />
-                                        </Body>
-                                        <Right>
-                                            {this.state.index == index && this.playbackInstance != null &&
-                                                <Icon active type='Feather' name="bar-chart-2" style={{ color: PRIMARYCOLOR.PURPLE }} />
-                                            }
-
-                                        </Right>
-                                    </ListItem>
-
-                                )
-                                }
+                                renderItem={this.renderItem}
                                 keyExtractor={(item) => item._id}
                             />
                         </List>

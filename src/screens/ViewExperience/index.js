@@ -468,9 +468,9 @@ class ViewExperience extends Component {
                         ref={this.setMenuRef}
                         button={<Text></Text>}
                     >
-                        <MenuItem textStyle={{ fontFamily: FONT.MEDIUM }} onPress={this.menuTapViewStats}>View stats</MenuItem>
+                        {/* <MenuItem textStyle={{ fontFamily: FONT.MEDIUM }} onPress={this.menuTapViewStats}>View stats</MenuItem> */}
                         {!me && <MenuItem textStyle={{ fontFamily: FONT.MEDIUM }} onPress={this.menuTapGoProfile}>Profile</MenuItem>}
-                        <MenuItem textStyle={{ fontFamily: FONT.MEDIUM, color: 'red' }} onPress={this.menuTapDeleteReportExperience}>{me ? 'Delete Experience' : 'Report'}</MenuItem>
+                        {/* <MenuItem textStyle={{ fontFamily: FONT.MEDIUM, color: 'red' }} onPress={this.menuTapDeleteReportExperience}>{me ? 'Delete Experience' : 'Report'}</MenuItem> */}
                     </Menu>
                 </TouchableOpacity>
 
