@@ -58,7 +58,6 @@ class Experience extends Component {
     }
 
     getMoments = () => {
-        console.log('>>>>>>>>>>');
         this.props.dispatch(updateProgressFlag(true));
         this.props.client.query({ query: USER_MOMENT_QUERY, fetchPolicy: 'network-only', variables: { id: this.props.auth.user._id } }).then(
             (res) => {

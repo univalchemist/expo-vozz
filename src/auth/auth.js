@@ -16,7 +16,7 @@ import {
   WaveIndicator
 } from 'react-native-indicators';
 import { connect } from 'react-redux';
-import { saveAuthdata } from '../actions';
+import { saveAuthdata, fetchLastMoments } from '../actions';
 import { getProfile } from '../utils/API/userAction';
 import { PRIMARYCOLOR } from '../constants/style';
 
@@ -36,6 +36,7 @@ class Login extends Component {
           .then((response1) => {
             let data1 = response1.data;
             this.props.dispatch(saveAuthdata({ jwt: token, user: data1 }));
+            this.props.dispatch(fetchLastMoments({ jwt: token, user: data1 }));
             console.log({ user: data1 });
             AsyncStorage.setItem('user', JSON.stringify(data1));
             this.props.navigation.navigate({

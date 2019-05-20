@@ -20,6 +20,8 @@ import CONSTANTS from "../utils/constantes";
 import { updateMoment } from "../utils/API/moment";
 import { TAG_QUERY } from "../utils/Apollo/Queries/tag";
 import { updateProfile, getProfile } from "../utils/API/userAction";
+import client from '../utils/Apollo/setup';
+import { LAST_MOMENT_QUERY } from '../utils/Apollo/Queries/moment';
 
 export function uploadRecording(payload) {
     return dispatch => {
@@ -159,23 +161,23 @@ export function updateProgressFlag(flag) {
 export function fetchLastMoments(payload) {
     return dispatch => {
         fetch(gql(`{
-                user(id: "${payload.auth.user._id}"){
+                user(id: "${payload.user._id}"){
                     moments(where: { createdAt_gt: "${ Moment().subtract(1, "days").toISOString()}"}) {
                         _id
                         createdAt
                         tags {
-                            nombre
+                            _id
+                            name
                         }
                         audio {
                             _id
                             url
-                            name
                         }
                     }
                 }
             }`), {
                 headers: {
-                    "Authorization": "Bearer " + payload.auth.jwt,
+                    "Authorization": "Bearer " + payload.jwt,
                     "Content-Type": "application/json",
                     "Accept": "application/json"
                 }
@@ -187,7 +189,6 @@ export function fetchLastMoments(payload) {
             }).catch(err => console.log(err))
     }
 }
-
 export function receiveLastMoments(payload) {
     return { type: RECEIVE_LAST_MOMENTS, payload }
 }

@@ -5,7 +5,8 @@ import { connect } from 'react-redux';
 import { withApollo } from 'react-apollo'
 import Swiper from 'react-native-swiper';
 import SlidingUpPanel from 'rn-sliding-up-panel'
-import { LinearGradient, ImagePicker, Permissions } from 'expo';
+import { LinearGradient, ImagePicker, Permissions, Audio } from 'expo';
+import { Ionicons } from '@expo/vector-icons';
 import Menu, { MenuItem } from 'react-native-material-menu';
 import ActionSheet from 'react-native-actionsheet';
 
@@ -16,7 +17,7 @@ import { styles } from './style';
 import { PRIMARYCOLOR, FONT } from '../../constants/style';
 import getPermissionAsync from '../../constants/funcs';
 import { updateProfile } from '../../utils/API/userAction';
-import { updateProgressFlag, updateTabIndex, updateUserdata } from '../../actions';
+import { updateProgressFlag, updateTabIndex, updateUserdata, fetchLastMoments } from '../../actions';
 import { compressImage } from '../../utils/ImageUtil';
 import { getCount } from '../../utils/number';
 import { USER_ROUTE_QUERY } from '../../utils/Apollo/Queries/route';
@@ -24,7 +25,8 @@ import CardExperience from '../../components/cardExperience';
 import { errorAlert } from '../../utils/API/errorHandle';
 import { USER_EXPERIENCE_QUERY } from '../../utils/Apollo/Queries/experience';
 import { Background } from '../../components/background';
-
+import MusicPlayer from '../../utils/Audio';
+import { calDiffHours } from '../../utils/Date';
 
 const { height, width } = Dimensions.get('window');
 const SLIDING_UP_PANEL_HEIGHT = Platform.select({
@@ -43,6 +45,7 @@ const options_ios = [
 const cancelButtonIndex = options.length - 1;
 const cancelButtonIndex_ios = options_ios.length - 1;
 class Profile extends React.Component {
+    MusicPlayer = null;
     constructor(props) {
         super(props);
         this.state = {
@@ -56,12 +59,20 @@ class Profile extends React.Component {
                 top: SLIDING_UP_PANEL_HEIGHT,
                 bottom: ((Dimensions.get('screen').height / Dimensions.get('screen').width) === (37 / 18)) ? 255 : 303
             },
-            plays: 0
+            plays: 0,
+
+            lasts: [],
+            playing: false,
         };
+
     }
-    _draggedValue = new Animated.Value(0)
+    _draggedValue = new Animated.Value(0);
+    async componentWillMount() {
+        this.MusicPlayer = new MusicPlayer();
+    }
     componentDidMount() {
         this.getMyRoutesExperiences();
+        this.fetchLastMoments();
     }
     componentWillReceiveProps(nextProps) {
         if (nextProps.auth.user !== this.props.auth.user) {
@@ -72,8 +83,52 @@ class Profile extends React.Component {
             });
         }
     }
+    fetchLastMoments = async () => {
+        let lasts = [...this.props.moments.last];
+        for (l of lasts) {
+            let diff = calDiffHours(l.createdAt);
+            l.play = false;
+            l.diff = diff;
+        }
+        console.log({ lasts })
+        this.setState({ lasts });
+
+    }
+    onTapPlay = (play, index) => {
+        console.log('PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP', play, index);
+        let temp = [...this.state.lasts];
+        for (t of temp) {
+            t.play = false;
+        }
+        temp[index]['play'] = !play;
+        this.setState({ lasts: temp });
+        if (play) {
+            this.stopPlay();
+            return;
+        }
+
+        let uri = temp[index]['audio']['url'];
+        console.log('---------------------------')
+        console.log({ uri });
+        this.startPlay(uri);
+
+    }
+    startPlay = (uri) => {
+        const source = { uri: uri };
+        this.MusicPlayer.startPlay(source, this.state.playing).then(() => {
+            this.setState({
+                playing: !this.state.playing
+            })
+        });
+    };
+    stopPlay = () => {
+        this.MusicPlayer.stopPlay(this.state.playing).then(() => {
+            this.setState({
+                playing: !this.state.playing
+            })
+        });
+    };
     getMyRoutesExperiences = async () => {
-        console.log("my profile page>>>>");
         this.props.dispatch(updateProgressFlag(true));
         try {
             let routes = [];
@@ -288,9 +343,18 @@ class Profile extends React.Component {
     onDragEnd = () => {
         console.log('onDragEnd', position);
     }
-
+    calDiffTime = (h) => {
+        if (1 > h > 0) {
+            let min = h * 60;
+            return min + ' mins ago';
+        } else if (h == 1) {
+            return h + ' hour ago';
+        } else {
+            return h + ' hours ago';
+        }
+    }
     render() {
-        const { experiences, dragging, image, tabIndex, user, plays, routes } = this.state;
+
         const { top, bottom } = this.state.draggableRange
         const draggedValue = this._draggedValue.interpolate({
             inputRange: [bottom, top],
@@ -376,7 +440,7 @@ class Profile extends React.Component {
         })
 
         const transform = [{ scale: draggedValue }];
-
+        const { experiences, dragging, image, tabIndex, user, plays, routes, lasts } = this.state;
         return (
             // <SafeAreaView style={styles.parentContainer}>
             <Container>
@@ -406,14 +470,42 @@ class Profile extends React.Component {
                     </TouchableOpacity>
                 </Animated.View>
                 <ImageBackground style={styles.swiperStyle} resizeMode="cover" source={images.placeHolderMoment}>
-                    <Swiper style={styles.swiperStyle} index={0} paginationStyle={{ bottom: ((Dimensions.get('screen').height / Dimensions.get('screen').width) === (37 / 18)) ? 265 : 313 }} activeDotColor={PRIMARYCOLOR.ORANGE} dotColor='#fff'>
-                        <View style={{ flex: 1, position: 'absolute', left: 10, bottom: ((Dimensions.get('screen').height / Dimensions.get('screen').width) === (37 / 18)) ? 265 : 313 }}>
-                            <Text style={{ color: 'white'}}>{'1 hour ago'}</Text>
-                        </View>
-                        <View style={{ flex: 1, position: 'absolute', left: 10, bottom: ((Dimensions.get('screen').height / Dimensions.get('screen').width) === (37 / 18)) ? 265 : 313 }}>
-                            <Text style={{ color: 'white'}}>{'2 hours ago'}</Text>
-                        </View>
-                    </Swiper>
+                    {lasts == null || lasts.length == 0 ? null
+                        :
+                        <Swiper style={styles.swiperStyle} index={0} paginationStyle={{ bottom: ((Dimensions.get('screen').height / Dimensions.get('screen').width) === (37 / 18)) ? 265 : 313 }} activeDotColor={PRIMARYCOLOR.ORANGE} dotColor='#fff'>
+                            {lasts.map((l, index) => (
+                                <View key={index} style={{ width: '100%', height: '100%' }}>
+                                    <View style={{ justifyContent: 'center', alignItems: 'center', marginTop: 40, width: '100%', height: '100%' - ((Dimensions.get('screen').height / Dimensions.get('screen').width) === (37 / 18)) ? 265 : 313 }}>
+                                        <LinearGradient
+                                            colors={['red', '#ED3A17']}
+                                            style={{
+                                                width: 80,
+                                                height: 80,
+                                                padding: 10,
+                                                borderRadius: 40
+                                            }}>
+                                            <TouchableOpacity
+                                                onPress={() => this.onTapPlay(l.play, index)}
+                                                style={{
+                                                    backgroundColor: '#fff',
+                                                    width: 60,
+                                                    height: 60,
+                                                    borderRadius: 30,
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center'
+                                                }}>
+                                                <Ionicons name={l.play ? 'ios-pause' : 'ios-play'} size={50} color={'#ED3A17'} />
+                                            </TouchableOpacity>
+                                        </LinearGradient>
+                                    </View>
+                                    <View style={{ flex: 1, position: 'absolute', left: 10, bottom: ((Dimensions.get('screen').height / Dimensions.get('screen').width) === (37 / 18)) ? 265 : 313 }}>
+                                        <Text style={{ color: 'white' }}>{this.calDiffTime(l.diff)}</Text>
+                                    </View>
+                                </View>
+                            ))}
+                        </Swiper>
+                    }
+
                 </ImageBackground>
 
 
@@ -557,7 +649,8 @@ class Profile extends React.Component {
     }
 }
 const mapStateToProps = (state) => ({
-    auth: state.auth
+    auth: state.auth,
+    moments: state.moments
 });
 
 export default withApollo(connect(mapStateToProps)(Profile))
