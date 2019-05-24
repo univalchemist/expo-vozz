@@ -24,7 +24,7 @@ export const USER_QUERY = gql`query user($id: ID!) {
       }
 }`;
 export const USERS_SEARCH_QUERY = gql`query users($search: String!) {
-  users(where: {username: $search}) {
+  users(where: {username_contains: $search}) {
         _id
         username
         full_name

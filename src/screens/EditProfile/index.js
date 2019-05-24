@@ -52,11 +52,12 @@ class EditProfile extends Component {
             email: this.props.auth.user.email,
             phoneNumber: this.props.auth.user.phone,
             birthDay: this.props.auth.user.birthDay,
-            gender: [{
-                value: 'Male',
-            }, {
-                value: 'Female',
-            }],
+            gender: [
+                { value: 'None' },
+                { value: 'Male' },
+                { value: 'Female' },
+                { value: 'Other' }
+            ],
             selected_gender: this.props.auth.user.gender,
             cca2: this.props.auth.user.countryName ? this.props.auth.user.countryName : cca2,
             callingCode: this.props.auth.user.countryCode ? this.props.auth.user.countryCode : callingCode,
@@ -343,7 +344,7 @@ class EditProfile extends Component {
                                             </View>
                                         </Item>
                                     </View>
-                                    <View style={{ width: '95%', alignSelf: 'center', marginTop: -5, marginBottom: 20 }}>
+                                    <View style={{ width: '95%', alignSelf: 'center', marginTop: -5, marginBottom: 50 }}>
                                         <Dropdown
                                             label="Gender"
                                             style={{ width: '100%' }}

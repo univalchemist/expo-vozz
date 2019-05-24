@@ -22,6 +22,7 @@ import MapViewDirections from '../../../utils/MapViewDirections';
 import CONSTANTS from '../../../utils/constantes';
 import { updateProgressFlag } from '../../../actions';
 import { deleteRoute } from '../../../utils/API/routeAction';
+import { getRouteType } from '../../../constants/routeType';
 
 
 const { width, height } = Dimensions.get('window');
@@ -40,7 +41,7 @@ class LastPage extends Component {
         super(props);
 
         this.musicCount = this.props.navigation.getParam('records').length,
-        this.isSeeking = false;
+            this.isSeeking = false;
         this.shouldPlayAtEndOfSeek = false;
         this.playbackInstance = null;
         this.mapView = null;
@@ -79,7 +80,7 @@ class LastPage extends Component {
             image: this.props.navigation.getParam('image'),
             route_id: this.props.navigation.getParam('route_id'),
             markers: this.props.navigation.getParam('markers'),
-
+            selected_type: this.props.navigation.getParam('selected_type'),
         };
 
     }
@@ -304,14 +305,18 @@ class LastPage extends Component {
     }
     onClickItem = (item, index) => {
         console.log(item, index);
+        const { records, isLoading } = this.state;
+        if (isLoading) {
+            return;
+        }
         if (this.playbackInstance != null) {
-            this.setState({ index: index })
+            records.map((m, i) => index == i ? m.play = true : m.play = false);
+            this.setState({ index: index, records });
             this._updatePlaybackInstanceForIndex(this.state.shouldPlay);
         }
-
     }
     render() {
-        const { flag, records, markers, user, region, title, isLoading, isPlaying } = this.state;
+        const { flag, records, markers, user, region, title, isLoading, isPlaying, selected_type } = this.state;
 
         return (
             <Container style={{ paddingTop: StatusBar.currentHeight, flex: 1 }}>
@@ -342,7 +347,7 @@ class LastPage extends Component {
                         ref={c => this.mapView = c}
                     >
                         {markers.map((item, index) =>
-                            <MapView.Marker key={item.key} coordinate={item.coordinate} >
+                            <MapView.Marker key={item.key} coordinate={item.coordinate} onPress={() => this.onClickItem(item, index)}>
                                 <CustomMarker text={`${index + 1}`} {...item.coordinate} />
                             </MapView.Marker>
                         )}
@@ -352,6 +357,7 @@ class LastPage extends Component {
                                     key={`point${index}`}
                                     origin={markers[index]['coordinate']}
                                     destination={markers[index + 1]['coordinate']}
+                                    selected_type={getRouteType(selected_type)}
                                     apikey={CONSTANTS.GOOGLE_MAP_DIRECTION_API_KEY}
                                     strokeWidth={3}
                                     strokeColor={PRIMARYCOLOR.PURPLE}

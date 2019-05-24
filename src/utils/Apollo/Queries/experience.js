@@ -42,7 +42,7 @@ export const EXPERIENCES_QUERY = gql`query experiences {
   }
 }`;
 export const EXPERIENCES_SEARCH_QUERY = gql`query experiences($search: String!) {
-  experiences(where: {title: $search}) {
+  experiences(where: {title_contains: $search}) {
     _id
     title
     image{url}

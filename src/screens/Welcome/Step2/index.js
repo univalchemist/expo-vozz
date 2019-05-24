@@ -41,11 +41,12 @@ class Step2 extends Component {
             base64: '',
             birthDay: '',
             bio: '',
-            gender: [{
-                value: 'Male',
-            }, {
-                value: 'Female',
-            }],
+            gender: [
+                { value: 'None' },
+                { value: 'Male' },
+                { value: 'Female' },
+                { value: 'Other' }
+            ],
             selected_gender: '',
             flag: false
         }

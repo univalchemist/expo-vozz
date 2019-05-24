@@ -11,6 +11,7 @@ export const USER_ROUTE_QUERY = gql`query routes($id: ID!) {
         comments{_id}
         likes{_id}
         plays{_id, own_user, count}
+        type
       }
 }`;
 
@@ -27,6 +28,7 @@ export const GET_ROUTE_QUERY = gql`query route($id: ID!) {
       tags{_id, name}
       plays{_id, user{_id, username}, route{_id}, own_user, count}
       moments{_id, ultimas, audio{_id, url}, user{_id, username}, title, tags{_id, name}}
+      type
     }
 }`;
 
@@ -42,10 +44,11 @@ export const ROUTES_QUERY = gql`query routes {
       comments{_id}
       likes{_id}
       plays{_id, own_user, count}
+      type
     }
 }`;
 export const ROUTES_SEARCH_QUERY = gql`query routes($search: String!) {
-  routes(where: {title: $search}) {
+  routes(where: {title_contains: $search}) {
       _id
       title
       image{url}
@@ -56,5 +59,6 @@ export const ROUTES_SEARCH_QUERY = gql`query routes($search: String!) {
       comments{_id}
       likes{_id}
       plays{_id, own_user, count}
+      type
     }
 }`;

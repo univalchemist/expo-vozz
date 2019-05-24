@@ -70,7 +70,7 @@ class AddPlace extends Component {
             title: this.props.navigation.getParam('title'),
             description: this.props.navigation.getParam('description'),
             image: this.props.navigation.getParam('image'),
-
+            selected_type: this.props.navigation.getParam('selected_type'),
         };
 
     }
@@ -298,7 +298,7 @@ class AddPlace extends Component {
         }
     }
     publishRoute = () => {
-        const { records, title, description, image, markers } = this.state;
+        const { records, title, description, image, markers, selected_type } = this.state;
         let temp = [];
         records.map(item => {
             temp.push(item.item._id);
@@ -322,7 +322,8 @@ class AddPlace extends Component {
             user: this.props.auth.user._id,
             markers: markers,
             moments: temp,
-            tags: output
+            tags: output,
+            type: selected_type
         }
         this.props.dispatch(updateProgressFlag(true));
         createRoute(this.props.auth.jwt, body)
@@ -347,7 +348,7 @@ class AddPlace extends Component {
 
     }
     uploadRouteImage = (route_id, image) => {
-        const { title, description, records, markers } = this.state;
+        const { title, description, records, markers, selected_type } = this.state;
         let body = new FormData();
         body.append('files', {
             uri: image,
@@ -361,7 +362,7 @@ class AddPlace extends Component {
         uploadRouteImage(this.props.auth.jwt, body)
             .then((response) => {
                 this.props.dispatch(updateProgressFlag(false));
-                this.props.navigation.navigate('LastPage', { route_id, title, description, records, image, markers });
+                this.props.navigation.navigate('LastPage', { route_id, title, description, records, image, markers, selected_type });
 
             })
             .catch((error) => {
@@ -459,8 +460,7 @@ class AddPlace extends Component {
                                 }}
                                 query={{
                                     key: CONSTANTS.GOOGLE_MAP_PLACE_API_KEY,
-                                    language: 'en',
-                                    types: '(cities)',
+                                    language: 'en'
                                 }}
                                 styles={{
                                     description: {
@@ -495,19 +495,7 @@ class AddPlace extends Component {
                                 nearbyPlacesAPI="GooglePlacesSearch"
                                 GoogleReverseGeocodingQuery={{
                                 }}
-                                GooglePlacesSearchQuery={{
-                                    rankby: 'distance',
-                                    types: 'food',
-                                }}
-                                filterReverseGeocodingByTypes={[
-                                    'locality',
-                                    'administrative_area_level_3',
-                                ]}
                                 debounce={200}
-                                GooglePlacesDetailsQuery={{
-                                    fields: 'formatted_address',
-                                }}
-                                predefinedPlacesAlwaysVisible={false}
                             />
                         </View>
                         <View style={styles.markerFixed}>
@@ -519,6 +507,7 @@ class AddPlace extends Component {
                                 <MapView
                                     style={{ flex: 1 }}
                                     initialRegion={initialRegion}
+                                    region={region}
                                     showsUserLocation={false}
                                     onRegionChangeComplete={this.onRegionChange}
                                 >

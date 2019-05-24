@@ -6,12 +6,12 @@ import Spinner from 'react-native-loading-spinner-overlay';
 import { connect } from 'react-redux';
 import { SwipeListView } from 'react-native-swipe-list-view';
 import ActionSheet from 'react-native-actionsheet';
-
+import { Dropdown } from 'react-native-material-dropdown';
 import { styles } from './style';
 import { TextView } from '../../../components/textView';
 import { Background } from '../../../components/background';
 import { HeaderContainer } from '../../../components/header';
-import { PRIMARYCOLOR } from '../../../constants/style';
+import { PRIMARYCOLOR, DEVICE } from '../../../constants/style';
 import { InputText } from '../../../components/inputText';
 import images from '../../../../assets';
 import getPermissionAsync from '../../../constants/funcs';
@@ -40,6 +40,14 @@ class AddDetails extends Component {
             description: '',
             records: this.props.navigation.getParam('records').map((item, i) => ({ key: `${i}`, title: item.title, item: item.item, play: false })),
             playing: false,
+
+            types: [
+                { value: 'Driving' },
+                { value: 'Walking' },
+                { value: 'Bicycling' },
+                { value: 'Transit' }
+            ],
+            selected_type: -1
         };
         this.rowSwipeAnimatedValues = {};
         Array(this.state.records.length).fill('').forEach((_, i) => {
@@ -52,11 +60,11 @@ class AddDetails extends Component {
     componentWillUnmount() {
     }
     onTapPublish = () => {
-        const { title, description, image, records } = this.state;
-        if (title == '' || description == '' || image == '') {
+        const { title, description, image, records, selected_type } = this.state;
+        if (title == '' || description == '' || image == '' || selected_type < 0) {
             Alert.alert(
                 'Vozz',
-                'Please fill out title, description and image for your route.',
+                'Please fill out title, description, route type and image for your route.',
                 [
                     { text: 'OK', onPress: () => console.log('Cancel Pressed'), style: 'cancel' }
                 ],
@@ -77,7 +85,7 @@ class AddDetails extends Component {
         }
 
         this.MusicPlayer.stopPlay()
-        this.props.navigation.navigate('AddPlace', { title, description, image, records });
+        this.props.navigation.navigate('AddPlace', { title, description, image, records, selected_type });
     }
     onchangeTitle = (title) => {
         this.setState({
@@ -200,7 +208,7 @@ class AddDetails extends Component {
         }
     }
     render() {
-        const { flag, title, image, records, description } = this.state;
+        const { flag, title, image, records, description, types } = this.state;
 
         return (
             <Container style={{ paddingTop: StatusBar.currentHeight }}>
@@ -241,6 +249,17 @@ class AddDetails extends Component {
                                     />
                                 </View>
                             </TouchableOpacity>
+                        </View>
+                        <View style={{ marginTop: 15 }}>
+                            <Dropdown
+                                label="Route Type"
+                                data={types}
+                                textColor={'#000000'}
+                                // itemTextStyle={styles.inputStyle}
+                                onChangeText={(value, key) => {
+                                    this.setState({ selected_type: key });
+                                }}
+                            />
                         </View>
                     </View>
                     <View style={{ flex: 1 }}>

@@ -27,6 +27,7 @@ import { updatePlay, createPlay } from '../../utils/API/play';
 import { deleteLike, createLike } from '../../utils/API/likes';
 import { updateProfileStore } from '../../actions';
 import { errorAlert } from '../../utils/API/errorHandle';
+import { getRouteType } from '../../constants/routeType';
 
 const BACKGROUND_COLOR = 'transparent';
 const LOADING_STRING = 'Loading...';
@@ -363,11 +364,15 @@ class ViewRoute extends Component {
     }
     onClickItem = (item, index) => {
         console.log(item, index);
+        const { moments, isLoading } = this.state;
+        if (isLoading) {
+            return;
+        }
         if (this.playbackInstance != null) {
-            this.setState({ index: index });
+            moments.map((m, i) => index == i ? m.play = true : m.play = false);
+            this.setState({ index: index, moments });
             this._updatePlaybackInstanceForIndex(this.state.shouldPlay);
         }
-
     }
     onTapGoBack = async () => {
         const { isLoading } = this.state;
@@ -456,7 +461,7 @@ class ViewRoute extends Component {
     renderItem = ({ item, index }) => {
         const { playIndex } = this.state;
         return (
-            <ListItem icon button={true}>
+            <ListItem icon button={true} onPress={() => this.onClickItem(item, index)}>
                 <Left>
                     <Icon name={'menu'} type='Feather' style={{ color: 'grey' }} />
                 </Left>
@@ -515,7 +520,7 @@ class ViewRoute extends Component {
                         ref={c => this.mapView = c}
                     >
                         {route.markers.map((item, index) =>
-                            <MapView.Marker key={item.key} coordinate={item.coordinate} >
+                            <MapView.Marker key={item.key} coordinate={item.coordinate} onPress={() => this.onClickItem(item, index)} >
                                 <CustomMarker text={`${index + 1}`} {...item.coordinate} />
                             </MapView.Marker>
                         )}
@@ -525,6 +530,7 @@ class ViewRoute extends Component {
                                     key={`point${index}`}
                                     origin={route.markers[index]['coordinate']}
                                     destination={route.markers[index + 1]['coordinate']}
+                                    selected_type={getRouteType(route.type)}
                                     apikey={CONSTANTS.GOOGLE_MAP_DIRECTION_API_KEY}
                                     strokeWidth={3}
                                     strokeColor={PRIMARYCOLOR.PURPLE}

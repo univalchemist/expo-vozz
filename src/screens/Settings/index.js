@@ -112,25 +112,60 @@ class Settings extends Component {
                 }
 
             case 1:
-                const status1 = await getPermissionAsync(Permissions.NOTIFICATIONS);
-                _permissions[1].checked = status1;
-                this.setState({ permissions: _permissions });
-                return;
+                if (item.checked) {
+                    Platform.OS === 'android' ?
+                        IntentLauncher.startActivityAsync(IntentLauncher.ACTION_NOTIFICATION_SETTINGS)
+                        :
+                        Linking.openURL('app-settings:')
+                    return;
+                } else {
+                    const status1 = await getPermissionAsync(Permissions.NOTIFICATIONS);
+                    _permissions[1].checked = status1;
+                    this.setState({ permissions: _permissions });
+                    return;
+                }
+
             case 2:
-                const status2 = await getPermissionAsync(Permissions.AUDIO_RECORDING);
-                _permissions[2].checked = status2;
-                this.setState({ permissions: _permissions });
-                return;
+                if (item.checked) {
+                    Platform.OS === 'android' ?
+                        IntentLauncher.startActivityAsync(IntentLauncher.ACTION_MANAGE_APPLICATIONS_SETTINGS)
+                        :
+                        Linking.openURL('app-settings:')
+                    return;
+                } else {
+                    const status2 = await getPermissionAsync(Permissions.AUDIO_RECORDING);
+                    _permissions[2].checked = status2;
+                    this.setState({ permissions: _permissions });
+                    return;
+                }
+
             case 3:
-                const status3 = await getPermissionAsync(Permissions.CAMERA_ROLL);
-                _permissions[3].checked = status3;
-                this.setState({ permissions: _permissions });
-                return;
+                if (item.checked) {
+                    Platform.OS === 'android' ?
+                        IntentLauncher.startActivityAsync(IntentLauncher.ACTION_MANAGE_APPLICATIONS_SETTINGS)
+                        :
+                        Linking.openURL('app-settings:')
+                    return;
+                } else {
+                    const status3 = await getPermissionAsync(Permissions.CAMERA_ROLL);
+                    _permissions[3].checked = status3;
+                    this.setState({ permissions: _permissions });
+                    return;
+                }
             case 4:
-                const status4 = await getPermissionAsync(Permissions.CAMERA);
-                _permissions[4].checked = status4;
-                this.setState({ permissions: _permissions });
-                return;
+                if (item.checked) {
+                    Platform.OS === 'android' ?
+                        IntentLauncher.startActivityAsync(IntentLauncher.ACTION_MANAGE_APPLICATIONS_SETTINGS)
+                        :
+                        Linking.openURL('app-settings:')
+                    return;
+                } else {
+                    const status4 = await getPermissionAsync(Permissions.CAMERA);
+                    _permissions[4].checked = status4;
+                    this.setState({ permissions: _permissions });
+                    return;
+                }
+
             default:
                 return;
         }
