@@ -10,6 +10,8 @@ import Menu, { MenuItem } from 'react-native-material-menu';
 import {
     SkypeIndicator,
 } from 'react-native-indicators';
+import { getStatusBarHeight, getBottomSpace } from 'react-native-iphone-x-helper'
+
 import { TextView } from '../../components/textView';
 import CardHome from '../../components/cardhome';
 import CardExperience from '../../components/cardExperience';
@@ -47,7 +49,7 @@ class UserProfile extends React.Component {
             following: false,
             draggableRange: {
                 top: SLIDING_UP_PANEL_HEIGHT,
-                bottom: ((Dimensions.get('screen').height / Dimensions.get('screen').width) === (37 / 18)) ? 255 : 303
+                bottom: Platform.OS === 'android' ? ((Dimensions.get('screen').height / Dimensions.get('screen').width) === (37 / 18)) ? 255 : 303 : 303 + getBottomSpace()
             },
 
             lasts: [],
@@ -87,7 +89,6 @@ class UserProfile extends React.Component {
 
     }
     onTapPlay = (play, index) => {
-        console.log('PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP', play, index);
         let temp = [...this.state.lasts];
         for (t of temp) {
             t.play = false;
@@ -100,7 +101,6 @@ class UserProfile extends React.Component {
         }
 
         let uri = temp[index]['audio']['url'];
-        console.log('---------------------------')
         console.log({ uri });
         this.startPlay(uri);
 

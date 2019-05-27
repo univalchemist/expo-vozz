@@ -12,15 +12,12 @@ import {
     UPDATE_USERDATA,
     SHOW_FLAG
 } from "../constants/action-types"
-import Moment from 'moment';
 import constantes from '../utils/constantes';
-import gql from '../utils/gql';
 import { FileSystem } from "expo";
 import CONSTANTS from "../utils/constantes";
 import { updateMoment } from "../utils/API/moment";
 import { TAG_QUERY } from "../utils/Apollo/Queries/tag";
 import { updateProfile, getProfile } from "../utils/API/userAction";
-import client from '../utils/Apollo/setup';
 import { LAST_MOMENT_QUERY } from '../utils/Apollo/Queries/moment';
 
 export function uploadRecording(payload) {
@@ -108,7 +105,6 @@ export function saveHashtags(payload, moment_id) {
         "Accept": "application/json"
     }
     return async dispatch => {
-        console.log({ hashtags: payload.hashtags });
         const hashtagsProm = payload.hashtags.map(async name => {
             try {
                 console.log('start get tag query!')
@@ -137,6 +133,7 @@ export function saveHashtags(payload, moment_id) {
             .then((response) => {
                 dispatch(updateProgressFlag(false));
                 dispatch(momentsNeedRefresh(true))
+                dispatch(fetchLastMoments({apolloClient: payload.client, user: payload.auth.user}))
                 dispatch(showHashtags({ show: false }))
             })
             .catch((error) => {
@@ -159,34 +156,16 @@ export function updateProgressFlag(flag) {
     return { type: SHOW_FLAG, payload: flag }
 }
 export function fetchLastMoments(payload) {
-    return dispatch => {
-        fetch(gql(`{
-                user(id: "${payload.user._id}"){
-                    moments(where: { createdAt_gt: "${ Moment().subtract(1, "days").toISOString()}"}) {
-                        _id
-                        createdAt
-                        tags {
-                            _id
-                            name
-                        }
-                        audio {
-                            _id
-                            url
-                        }
-                    }
-                }
-            }`), {
-                headers: {
-                    "Authorization": "Bearer " + payload.jwt,
-                    "Content-Type": "application/json",
-                    "Accept": "application/json"
-                }
-            }).then(resp => {
-                resp.json().then(data => {
-                    dispatch(receiveLastMoments(data.data.user.moments))
-                    dispatch(momentsNeedRefresh(false))
-                }).catch(err => console.log(err))
-            }).catch(err => console.log(err))
+    return async dispatch => {
+        try {
+            let res = await payload.apolloClient.query({ query: LAST_MOMENT_QUERY, fetchPolicy: 'network-only', variables: { id: payload.user._id } });
+            let lasts = res.data.moments;
+            console.log({ lasts })
+            dispatch(receiveLastMoments(lasts))
+            dispatch(momentsNeedRefresh(false))
+        } catch (e) {
+            console.log({ errorR: e })
+        }
     }
 }
 export function receiveLastMoments(payload) {

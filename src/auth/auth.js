@@ -19,6 +19,7 @@ import { connect } from 'react-redux';
 import { saveAuthdata, fetchLastMoments } from '../actions';
 import { getProfile } from '../utils/API/userAction';
 import { PRIMARYCOLOR } from '../constants/style';
+import { withApollo } from 'react-apollo';
 
 class Login extends Component {
   constructor(props) {
@@ -35,8 +36,9 @@ class Login extends Component {
         getProfile(user._id)
           .then((response1) => {
             let data1 = response1.data;
+            let apolloClient = this.props.client;
             this.props.dispatch(saveAuthdata({ jwt: token, user: data1 }));
-            this.props.dispatch(fetchLastMoments({ jwt: token, user: data1 }));
+            this.props.dispatch(fetchLastMoments({ jwt: token, user: data1, apolloClient }));
             console.log({ user: data1 });
             AsyncStorage.setItem('user', JSON.stringify(data1));
             this.props.navigation.navigate({
@@ -75,4 +77,4 @@ class Login extends Component {
   }
 }
 
-export default connect()(Login)
+export default withApollo(connect()(Login))

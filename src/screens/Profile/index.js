@@ -1,5 +1,5 @@
 import React from 'react'
-import { Text, View, Dimensions, Image, Animated, ImageBackground, Alert, AsyncStorage, TouchableOpacity, ScrollView, Platform, ActionSheetIOS } from 'react-native';
+import { Text, View, Dimensions, Animated, ImageBackground, Alert, AsyncStorage, TouchableOpacity, ScrollView, Platform, ActionSheetIOS } from 'react-native';
 import { Button, Icon, Container, Content } from 'native-base';
 import { connect } from 'react-redux';
 import { withApollo } from 'react-apollo'
@@ -27,6 +27,8 @@ import { USER_EXPERIENCE_QUERY } from '../../utils/Apollo/Queries/experience';
 import { Background } from '../../components/background';
 import MusicPlayer from '../../utils/Audio';
 import { calDiffHours } from '../../utils/Date';
+import { LAST_MOMENT_QUERY } from '../../utils/Apollo/Queries/moment';
+import { getBottomSpace } from 'react-native-iphone-x-helper';
 
 const { height, width } = Dimensions.get('window');
 const SLIDING_UP_PANEL_HEIGHT = Platform.select({
@@ -57,7 +59,7 @@ class Profile extends React.Component {
             experiences: [],
             draggableRange: {
                 top: SLIDING_UP_PANEL_HEIGHT,
-                bottom: ((Dimensions.get('screen').height / Dimensions.get('screen').width) === (37 / 18)) ? 255 : 303
+                bottom: Platform.OS === 'android' ? ((Dimensions.get('screen').height / Dimensions.get('screen').width) === (37 / 18)) ? 255 : 303 : 303 + getBottomSpace()
             },
             plays: 0,
 
@@ -71,8 +73,9 @@ class Profile extends React.Component {
         this.MusicPlayer = new MusicPlayer();
     }
     componentDidMount() {
+        let lasts = [...this.props.moments.last];
         this.getMyRoutesExperiences();
-        this.fetchLastMoments();
+        this.fetchLastMoments(lasts);
     }
     componentWillReceiveProps(nextProps) {
         if (nextProps.auth.user !== this.props.auth.user) {
@@ -81,10 +84,11 @@ class Profile extends React.Component {
                 user: nextProps.auth.user,
                 image: nextProps.auth.user.profile_base64
             });
+        } else if(nextProps.moments.last !== this.props.moments.last) {
+            this.fetchLastMoments(nextProps.moments.last);
         }
     }
-    fetchLastMoments = async () => {
-        let lasts = [...this.props.moments.last];
+    fetchLastMoments = async (lasts) => {
         for (l of lasts) {
             let diff = calDiffHours(l.createdAt);
             l.play = false;
@@ -95,7 +99,6 @@ class Profile extends React.Component {
 
     }
     onTapPlay = (play, index) => {
-        console.log('PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP', play, index);
         let temp = [...this.state.lasts];
         for (t of temp) {
             t.play = false;
@@ -108,7 +111,6 @@ class Profile extends React.Component {
         }
 
         let uri = temp[index]['audio']['url'];
-        console.log('---------------------------')
         console.log({ uri });
         this.startPlay(uri);
 
@@ -472,7 +474,7 @@ class Profile extends React.Component {
                 <ImageBackground style={styles.swiperStyle} resizeMode="cover" source={images.placeHolderMoment}>
                     {lasts == null || lasts.length == 0 ? null
                         :
-                        <Swiper style={styles.swiperStyle} index={0} paginationStyle={{ bottom: ((Dimensions.get('screen').height / Dimensions.get('screen').width) === (37 / 18)) ? 265 : 313 }} activeDotColor={PRIMARYCOLOR.ORANGE} dotColor='#fff'>
+                        <Swiper style={styles.swiperStyle} index={3} paginationStyle={{ bottom: ((Dimensions.get('screen').height / Dimensions.get('screen').width) === (37 / 18)) ? 265 : 313 }} activeDotColor={PRIMARYCOLOR.ORANGE} dotColor='#fff'>
                             {lasts.map((l, index) => (
                                 <View key={index} style={{ width: '100%', height: '100%' }}>
                                     <View style={{ justifyContent: 'center', alignItems: 'center', marginTop: 40, width: '100%', height: '100%' - ((Dimensions.get('screen').height / Dimensions.get('screen').width) === (37 / 18)) ? 265 : 313 }}>
