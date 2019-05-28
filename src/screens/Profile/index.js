@@ -474,7 +474,7 @@ class Profile extends React.Component {
                 <ImageBackground style={styles.swiperStyle} resizeMode="cover" source={images.placeHolderMoment}>
                     {lasts == null || lasts.length == 0 ? null
                         :
-                        <Swiper style={styles.swiperStyle} index={3} paginationStyle={{ bottom: ((Dimensions.get('screen').height / Dimensions.get('screen').width) === (37 / 18)) ? 265 : 313 }} activeDotColor={PRIMARYCOLOR.ORANGE} dotColor='#fff'>
+                        <Swiper style={styles.swiperStyle} index={0} paginationStyle={{ bottom: ((Dimensions.get('screen').height / Dimensions.get('screen').width) === (37 / 18)) ? 265 : 313 }} activeDotColor={PRIMARYCOLOR.ORANGE} dotColor='#fff'>
                             {lasts.map((l, index) => (
                                 <View key={index} style={{ width: '100%', height: '100%' }}>
                                     <View style={{ justifyContent: 'center', alignItems: 'center', marginTop: 40, width: '100%', height: '100%' - ((Dimensions.get('screen').height / Dimensions.get('screen').width) === (37 / 18)) ? 265 : 313 }}>

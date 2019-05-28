@@ -1,15 +1,21 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, StatusBar, Platform } from 'react-native';
 import { FONT, DEVICE } from '../../constants/style';
+import { getStatusBarHeight } from 'react-native-iphone-x-helper';
 export const styles = StyleSheet.create({
     contentStyle: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
+        paddingTop: Platform.OS == 'android' ? StatusBar.currentHeight + 10 : getStatusBarHeight() + 10
     },
     cardContainer: {
         width: DEVICE.WIDTH - 50,
         height: 180,
         marginTop: 0
+    },
+    overlay: {
+        ...StyleSheet.absoluteFillObject,
+        backgroundColor: 'rgba(0,0,0,0.3)'
     },
     slide: {
         flex: 1,

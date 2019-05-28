@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, Alert, AsyncStorage, StatusBar, ImageBackground, RefreshControl, Animated, Dimensions, ScrollView, TouchableHighlight } from 'react-native';
+import { View, ImageBackground, RefreshControl, Animated, Dimensions, ScrollView, TouchableHighlight } from 'react-native';
 import { Container, Content, Card } from 'native-base';
 import Spinner from 'react-native-loading-spinner-overlay';
 import SwitchButton from 'switch-button-react-native';
@@ -114,7 +114,7 @@ class Home extends Component {
     render() {
         const { flag, featured, search, activeSwitch, user, trend_experiences, trend_routes } = this.state;
         return (
-            <Container style={{ paddingTop: StatusBar.currentHeight }}>
+            <Container>
                 <Background height={200} end={'transparent'} />
                 <Spinner
                     visible={flag}
@@ -152,6 +152,7 @@ class Home extends Component {
                                         <TouchableHighlight underlayColor="#ffffff00" key={index} style={styles.slide} onPress={() => this.props.navigation.navigate('ViewCategory', { tags: this.getTags(item.tags), title: item.title })}>
                                             <Card style={styles.cardContainer} borderRadius={10}>
                                                 <ImageBackground source={item.picture ? ({ uri: item.picture.url }) : (images.sample1)} style={{ flex: 1, height: '100%', width: '100%', borderRadius: 10 }} imageStyle={{ borderRadius: 10 }}>
+                                                    <View style={styles.overlay} />
                                                     <View style={styles.labelView}>
                                                         <LabelView style={styles.labelStyle} value={item.description} />
                                                     </View>
@@ -175,7 +176,7 @@ class Home extends Component {
                                 </View>
                                 <ScrollView showsHorizontalScrollIndicator={false} horizontal={true} style={{ marginTop: 10, paddingHorizontal: 0 }}>
                                     {user.categories.map((item, index) => (
-                                        <Category key={index} item={item} fontStyle={styles.fontStyle} tags={item.tags} navigation={this.props.navigation}/>
+                                        <Category key={index} item={item} fontStyle={styles.fontStyle} tags={item.tags} navigation={this.props.navigation} />
                                     ))}
                                 </ScrollView>
                             </View>
