@@ -11,7 +11,8 @@ export const styles = StyleSheet.create({
     cardContainer: {
         width: DEVICE.WIDTH - 50,
         height: 180,
-        marginTop: 0
+        marginTop: 0,
+        borderRadius: 30
     },
     overlay: {
         ...StyleSheet.absoluteFillObject,

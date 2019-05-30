@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, StatusBar, Platform, KeyboardAvoidingView } from 'react-native';
+import { View, StatusBar, Platform, KeyboardAvoidingView, YellowBox } from 'react-native';
 import { Container, Content } from 'native-base';
 import Spinner from 'react-native-loading-spinner-overlay';
 import { getBottomSpace } from 'react-native-iphone-x-helper';
@@ -17,7 +17,9 @@ import { styles } from './style';
 import { Background } from '../../../components/background';
 import { HeaderContainer } from '../../../components/header';
 import { PRIMARYCOLOR } from '../../../constants/style';
-
+import Backend from '../../../utils/Firebase/ChatUtil';
+import { withApollo } from 'react-apollo';
+import _ from 'lodash';
 
 const filterBotMessages = (message) => !message.system && message.user && message.user._id && message.user._id === 2;
 const findStep = (step) => (_, index) => index === step - 1;
@@ -26,11 +28,17 @@ const findStep = (step) => (_, index) => index === step - 1;
 class Chat extends Component {
     constructor(props) {
         super(props);
-
+        YellowBox.ignoreWarnings(['Setting a timer']);
+        const _console = { ...console };
+        console.warn = message => {
+            if (message.indexOf('Setting a timer') <= -1) {
+                _console.warn(message);
+            }
+        };
         this.state = {
             user: this.props.navigation.getParam('user'),
-            receiver: { _id: 2, name: this.props.navigation.getParam('user').name, avatar: this.props.navigation.getParam('user').url },
-            sender: { _id: 1, name: 'Gui' },
+            receiver: { _id: this.props.navigation.getParam('user')._id, name: this.props.navigation.getParam('user').username, avatar: this.props.navigation.getParam('user').url },
+            sender: { _id: this.props.auth.user._id, name: this.props.auth.user.username },
             flag: false,
 
             step: 0,
@@ -39,15 +47,27 @@ class Chat extends Component {
             typingText: null,
             isLoadingEarlier: false,
         };
+        this.setRef();
+    }
+    setRef = () => {
+        Backend.setRef(this.props.auth.user, this.props.navigation.getParam('user'));
     }
     _isMounted = false;
     async componentWillMount() {
         this._isMounted = true;
-        // init with only system messages
-        this.setState({ messages: messagesData.filter((message) => message.system), appIsReady: true });
+    }
+    componentDidMount() {
+        Backend.loadMessages((message) => {
+            this.setState((previousState) => {
+                return {
+                    messages: GiftedChat.append(previousState.messages, message),
+                };
+            });
+        });
     }
     componentWillUnmount() {
         this._isMounted = false;
+        Backend.closeChat();
     }
     onLoadEarlier = () => {
         this.setState((previousState) => {
@@ -83,19 +103,6 @@ class Chat extends Component {
             };
         });
         // for demo purpose
-        setTimeout(() => this.botSend(step), Math.round(Math.random() * 1000));
-    };
-
-    botSend = (step = 0) => {
-        const newMessage = messagesData
-            .reverse()
-            .filter(filterBotMessages)
-            .find(findStep(step));
-        if (newMessage) {
-            this.setState((previousState) => ({
-                messages: GiftedChat.append(previousState.messages, newMessage),
-            }));
-        }
     };
 
     parsePatterns = (linkStyle) => {
@@ -111,20 +118,6 @@ class Chat extends Component {
     renderCustomView(props) {
         return <CustomView {...props} />;
     }
-
-    onReceive = (text) => {
-        const { receiver } = this.state;
-        this.setState((previousState) => {
-            return {
-                messages: GiftedChat.append(previousState.messages, {
-                    _id: Math.round(Math.random() * 1000000),
-                    text,
-                    createdAt: new Date(),
-                    user: receiver,
-                }),
-            };
-        });
-    };
 
     onSendFromUser = (messages = []) => {
         const { sender } = this.state;
@@ -181,32 +174,31 @@ class Chat extends Component {
     };
     render() {
         const { flag, user, receiver, sender } = this.state;
-        if (!this.state.appIsReady) {
-            return <AppLoading />;
-        }
         return (
-            <Container style={{ paddingTop: StatusBar.currentHeight}}>
+            <Container style={{ paddingTop: StatusBar.currentHeight }}>
                 <Background start={PRIMARYCOLOR.ORANGE} end={PRIMARYCOLOR.ORANGE} height={300} />
                 <Spinner
                     visible={flag}
                     textContent={""}
                 />
-                <HeaderContainer title={user.name} goBack={true} navigation={this.props.navigation} avatar={true} uri={user.url} right={false} />
+                <HeaderContainer title={user.username} goBack={true} navigation={this.props.navigation} avatar={true} uri={user.url} right={false} />
                 <Content contentContainerStyle={styles.contentStyle}>
                     <View style={{ flex: 1, paddingBottom: getBottomSpace() }} accessible accessibilityLabel="main" testID="main">
                         <GiftedChat
                             messages={this.state.messages}
-                            onSend={this.onSend}
+                            onSend={(message) => {
+                                Backend.sendMessage(message);
+                            }}
                             keyboardShouldPersistTaps="never"
-                            loadEarlier={this.state.loadEarlier}
-                            onLoadEarlier={this.onLoadEarlier}
-                            isLoadingEarlier={this.state.isLoadingEarlier}
+                            // loadEarlier={this.state.loadEarlier}
+                            // onLoadEarlier={this.onLoadEarlier}
+                            // isLoadingEarlier={this.state.isLoadingEarlier}
                             parsePatterns={this.parsePatterns}
                             user={sender}
                             // renderAccessory={this.renderAccessory}
-                            renderActions={this.renderCustomActions}
+                            // renderActions={this.renderCustomActions}
                             renderBubble={this.renderBubble}
-                            renderSystemMessage={this.renderSystemMessage}
+                            // renderSystemMessage={this.renderSystemMessage}
                             renderCustomView={this.renderCustomView}
                             renderFooter={this.renderFooter}
                         />
@@ -217,5 +209,7 @@ class Chat extends Component {
         )
     }
 }
-
-export default connect()(Chat)
+const mapStateToProps = (state) => ({
+    auth: state.auth
+});
+export default withApollo(connect(mapStateToProps)(Chat))

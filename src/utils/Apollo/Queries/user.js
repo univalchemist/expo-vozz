@@ -48,6 +48,22 @@ export const USERS_SEARCH_QUERY = gql`query users($search: String!) {
       }
 }`;
 
+export const CHAT_USERS_QUERY = gql`query users {
+  users {
+        _id
+        username
+        full_name
+        email
+        birthDay
+        gender
+        bio
+        profile_base64
+        countryCode
+        phone
+        countryName
+      }
+}`;
+
 export const USERS_QUERY = gql`query users {
   users {
         _id

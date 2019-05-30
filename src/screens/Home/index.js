@@ -149,8 +149,8 @@ class Home extends Component {
                                     activeDotColor={PRIMARYCOLOR.PURPLE}
                                 >
                                     {featured.map((item, index) => (
-                                        <TouchableHighlight underlayColor="#ffffff00" key={index} style={styles.slide} onPress={() => this.props.navigation.navigate('ViewCategory', { tags: this.getTags(item.tags), title: item.title })}>
-                                            <Card style={styles.cardContainer} borderRadius={10}>
+                                        <TouchableHighlight underlayColor="transparent" key={index} style={styles.slide} onPress={() => this.props.navigation.navigate('ViewCategory', { tags: this.getTags(item.tags), title: item.title })}>
+                                            <Card style={styles.cardContainer} borderRadius={100}>
                                                 <ImageBackground source={item.picture ? ({ uri: item.picture.url }) : (images.sample1)} style={{ flex: 1, height: '100%', width: '100%', borderRadius: 10 }} imageStyle={{ borderRadius: 10 }}>
                                                     <View style={styles.overlay} />
                                                     <View style={styles.labelView}>

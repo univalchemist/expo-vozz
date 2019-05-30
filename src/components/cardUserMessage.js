@@ -10,10 +10,10 @@ const CardUserMessage = (props) => (
         <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
             <Image
                 style={{ width: 60, height: 60, borderRadius: 30 }}
-                source={props.item.url ? ({ uri: props.item.url }) : (images.girl_avatar)}
+                source={props.item.profile_base64 ? ({ uri: `data:image/png;base64,${props.item.profile_base64}` }) : (images.default_avatar)}
             />
             <View style={styles.textPart} >
-                <Text style={{ fontSize: 20, fontFamily: FONT.BOOK }}>{props.item.name}</Text>
+                <Text style={{ fontSize: 20, fontFamily: FONT.BOOK }}>{props.item.username}</Text>
                 <Text style={{ fontFamily: FONT.BOOK, color: 'grey' }}>{props.item.last}</Text>
             </View>
             <View style={{ padding: 0, justifyContent: 'center' }}>

@@ -1,12 +1,19 @@
 import React, { Component } from 'react';
 import { View, StatusBar, RefreshControl, Dimensions, ScrollView } from 'react-native';
 import { Container, Content } from 'native-base';
-import Spinner from 'react-native-loading-spinner-overlay';
+import {
+  SkypeIndicator,
+} from 'react-native-indicators';
 import CardUserMessage from '../../components/cardUserMessage'
 import { connect } from 'react-redux';
 import { styles } from './style';
 import { TextView } from '../../components/textView';
 import { Background } from '../../components/background';
+import { withApollo } from 'react-apollo';
+import { errorAlert } from '../../utils/API/errorHandle';
+import { CHAT_USERS_QUERY } from '../../utils/Apollo/Queries/user';
+import { strikethrough } from 'ansi-colors';
+import { PRIMARYCOLOR } from '../../constants/style';
 
 let SCREEN_WIDTH = Dimensions.get('window').width;
 class Messages extends Component {
@@ -17,19 +24,33 @@ class Messages extends Component {
       refreshing: false,
       recorder: false,
       search: '',
-      users: [
-        { url: '', name: 'Gui Xiao', last: 'This was great', unRead: true },
-        { url: 'https://images.pexels.com/photos/1250643/pexels-photo-1250643.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260', name: 'LiGwang', last: 'Not today', unRead: false },
-        { url: '', name: 'Roscal Meyun', last: 'This was great', unRead: true },
-        { url: 'https://images.pexels.com/photos/1262357/pexels-photo-1262357.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260', name: 'Hong De Shuai', last: 'I am busy', unRead: true },
-        { url: '', name: 'Menes', last: 'This was great', unRead: false },
-      ],
+      users: [],
       flag: false
     };
   }
+  componentWillMount() {
+    this.getChatList();
 
+  }
   componentDidMount() {
-    
+  }
+  getChatList = async () => {
+    this.setState({ flag: true });
+    try {
+      let res = await this.props.client.query({ query: CHAT_USERS_QUERY, fetchPolicy: 'network-only' });
+      let users = this.removeMe(res.data.users);
+      console.log({ users });
+      this.setState({ users, flag: false });
+    } catch (e) {
+      this.setState({ flag: false });
+      console.log({ getChatList: e });
+      errorAlert('Network error. Please make sure your network is connected.')
+    }
+  }
+  removeMe = (array) => {
+    let id = this.props.auth.user._id;
+    let filteredArray = array.filter(item => item._id !== id)
+    return filteredArray;
   }
   _onRefresh = () => {
     this.setState({ refreshing: true });
@@ -43,19 +64,20 @@ class Messages extends Component {
   _onTextClear = () => {
 
   }
-onTapUser = (item) => {
-  console.log("onTapUser", item);
-  this.props.navigation.navigate('Chat', {user: item});
-}
+  onTapUser = (item) => {
+    console.log("onTapUser", item);
+    this.props.navigation.navigate('Chat', { user: item });
+  }
   render() {
     const { flag, users } = this.state;
     return (
       <Container style={{ paddingTop: StatusBar.currentHeight }}>
         <Background height={200} end={'transparent'} />
-        <Spinner
-          visible={flag}
-          textContent={""}
-        />
+        {flag &&
+          <View style={styles.progressBar}>
+            <SkypeIndicator color={PRIMARYCOLOR.ORANGE} size={40} />
+          </View>
+        }
         <Content contentContainerStyle={styles.contentStyle}>
           <View style={{ width: SCREEN_WIDTH }}>
             <TextView style={styles.messageTitleStyle} value={'Private Messages'} />
@@ -69,9 +91,9 @@ onTapUser = (item) => {
               />
             } style={{ flex: 1 }}>
             <View style={{ width: SCREEN_WIDTH, marginTop: 10, paddingHorizontal: 10 }}>
-                {users.map((item, index) => (
-                  <CardUserMessage key={index} item={item} onPress={this.onTapUser} />
-                ))}
+              {users.map((item, index) => (
+                <CardUserMessage key={index} item={item} onPress={this.onTapUser} />
+              ))}
 
             </View>
           </ScrollView>
@@ -80,5 +102,7 @@ onTapUser = (item) => {
     )
   }
 }
-
-export default connect()(Messages)
+const mapStateToProps = (state) => ({
+  auth: state.auth
+});
+export default withApollo(connect(mapStateToProps)(Messages));
