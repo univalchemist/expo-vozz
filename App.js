@@ -1,15 +1,23 @@
 import React from 'react';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, YellowBox } from 'react-native';
 import { Provider } from 'react-redux'
 import { Font, AppLoading } from "expo";
 import { ApolloProvider } from 'react-apollo'
 import store from './src/store/index'
 import ReduxApp from './ReduxApp'
 import client from './src/utils/Apollo/setup';
-
+import Backend from './src/utils/Firebase/ChatUtil'
+import _ from 'lodash';
 export default class YourApp extends React.Component {
 
   constructor(props) {
+    YellowBox.ignoreWarnings(['Setting a timer']);
+    const _console = { ...console };
+    console.warn = message => {
+      if (message.indexOf('Setting a timer') <= -1) {
+        _console.warn(message);
+      }
+    };
     super(props);
     this.state = {
       loading: true
@@ -26,6 +34,15 @@ export default class YourApp extends React.Component {
       futura_medium_font: require("./assets/fonts/futura-medium-bt.ttf"),
     });
     this.setState({ loading: false });
+  }
+  componentDidMount() {
+    // Backend.loadUsers((users) => {
+    //   console.log('=============================')
+    //   console.log({ App_firebaseMessage: users });
+    // });
+  }
+  componentWillUnmount() {
+    // Backend.closeUSersConnection();
   }
   render() {
     if (this.state.loading) {

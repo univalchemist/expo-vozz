@@ -4,6 +4,7 @@ import { withNavigation } from 'react-navigation';
 import { Icon } from 'native-base';
 import images from '../../assets'
 import { FONT } from '../constants/style';
+import { LastMsgTime } from '../utils/Date';
 const CardUserMessage = (props) => (
 
     <TouchableHighlight underlayColor="#ffffff00" style={[styles.shadow, styles.container]} onPress={() => props.onPress(props.item)}>
@@ -14,10 +15,11 @@ const CardUserMessage = (props) => (
             />
             <View style={styles.textPart} >
                 <Text style={{ fontSize: 20, fontFamily: FONT.BOOK }}>{props.item.username}</Text>
-                <Text style={{ fontFamily: FONT.BOOK, color: 'grey' }}>{props.item.last}</Text>
+                <Text style={{ fontFamily: FONT.BOOK, color: 'grey' }}>{props.last}</Text>
             </View>
-            <View style={{ padding: 0, justifyContent: 'center' }}>
-                <Icon active type='Entypo' name="dot-single" style={{ color: props.item.unRead ? 'red' : 'grey' }} />
+            <View style={{ padding: 0, justifyContent: 'center', alignItems: 'flex-end' }}>
+                <Icon active type='Entypo' name="dot-single" style={{ color: props.unRead ? 'grey' : 'red' }} />
+                <Text style={{ fontFamily: FONT.BOOK, color: 'grey', fontSize: 10 }}>{props.time?LastMsgTime(new Date(props.time)):''}</Text>
             </View>
         </View>
     </TouchableHighlight>
@@ -44,11 +46,11 @@ const styles = StyleSheet.create({
         elevation: 5,
     },
     textPart: {
-        flex: 5, 
-        padding: 10, 
-        marginLeft: 10, 
-        flexDirection: 'column', 
-        justifyContent: 'center', 
+        flex: 5,
+        padding: 10,
+        marginLeft: 10,
+        flexDirection: 'column',
+        justifyContent: 'center',
         alignItems: 'stretch'
     }
 })

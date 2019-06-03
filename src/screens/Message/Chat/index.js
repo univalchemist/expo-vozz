@@ -21,20 +21,16 @@ import Backend from '../../../utils/Firebase/ChatUtil';
 import { withApollo } from 'react-apollo';
 import _ from 'lodash';
 
-const filterBotMessages = (message) => !message.system && message.user && message.user._id && message.user._id === 2;
-const findStep = (step) => (_, index) => index === step - 1;
-
-
 class Chat extends Component {
     constructor(props) {
         super(props);
-        YellowBox.ignoreWarnings(['Setting a timer']);
-        const _console = { ...console };
-        console.warn = message => {
-            if (message.indexOf('Setting a timer') <= -1) {
-                _console.warn(message);
-            }
-        };
+        // YellowBox.ignoreWarnings(['Setting a timer']);
+        // const _console = { ...console };
+        // console.warn = message => {
+        //     if (message.indexOf('Setting a timer') <= -1) {
+        //         _console.warn(message);
+        //     }
+        // };
         this.state = {
             user: this.props.navigation.getParam('user'),
             receiver: { _id: this.props.navigation.getParam('user')._id, name: this.props.navigation.getParam('user').username, avatar: this.props.navigation.getParam('user').url },
@@ -55,14 +51,18 @@ class Chat extends Component {
     _isMounted = false;
     async componentWillMount() {
         this._isMounted = true;
+        const { user, sender } = this.state;
+        Backend.updateMsgStatus(sender._id, user._id)
     }
     componentDidMount() {
+        const { user, sender } = this.state;
         Backend.loadMessages((message) => {
             this.setState((previousState) => {
                 return {
                     messages: GiftedChat.append(previousState.messages, message),
                 };
             });
+            Backend.updateMsgStatus(sender._id, user._id)
         });
     }
     componentWillUnmount() {

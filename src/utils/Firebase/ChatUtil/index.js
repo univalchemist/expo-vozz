@@ -4,6 +4,11 @@ class Backend {
     uid = '';
     messagesRef = null;
     receiver_messagesRef = null;
+    ref = null
+
+    senderRef = null;
+    receiverRef = null;
+    lastMsgRef = null;
     // initialize Firebase Backend
     constructor() {
         firebase.initializeApp({
@@ -34,6 +39,11 @@ class Backend {
     setRef(sender, user) {
         this.messagesRef = firebase.database().ref('messages').child(sender._id).child(user._id);
         this.receiver_messagesRef = firebase.database().ref('messages').child(user._id).child(sender._id);
+        this.senderRef = firebase.database().ref('users').child(sender._id).child(user._id);
+        this.receiverRef = firebase.database().ref('users').child(user._id).child(sender._id);
+    }
+    setLastMsgRef(id) {
+        this.lastMsgRef = firebase.database().ref('users').child(id);
     }
     // retrieve the messages from the Backend
     loadMessages(callback) {
@@ -65,12 +75,54 @@ class Backend {
                 user: message[i].user,
                 createdAt: firebase.database.ServerValue.TIMESTAMP,
             });
+            this.receiverRef.set({
+                last: {
+                    message: message[i].text,
+                    updatedAt: firebase.database.ServerValue.TIMESTAMP,
+                    received: false
+                },
+            });
+            this.senderRef.set({
+                last: {
+                    message: message[i].text,
+                    updatedAt: firebase.database.ServerValue.TIMESTAMP,
+                    received: true
+                },
+            });
         }
+    }
+    updateMsgStatus(sender_id, user_id) {
+        const ref = firebase.database().ref('users').child(sender_id).child(user_id);
+        ref.once('value', snapshot => {
+            const message = snapshot.val()
+            console.log({ lastMessage: message });
+            ref.set({
+                last: {
+                    message: message.last.message,
+                    updatedAt: firebase.database.ServerValue.TIMESTAMP,
+                    received: true
+                },
+            });
+        });
     }
     // close the connection to the Backend
     closeChat() {
         if (this.messagesRef) {
             this.messagesRef.off();
+        }
+    }
+
+    loadUsers(callback) {
+        this.lastMsgRef.off();
+        const onReceive = (data) => {
+            const user = data.val();
+            callback(user);
+        };
+        this.lastMsgRef.on('value', onReceive);
+    }
+    closeUSersConnection() {
+        if (this.lastMsgRef) {
+            this.lastMsgRef.off();
         }
     }
 }

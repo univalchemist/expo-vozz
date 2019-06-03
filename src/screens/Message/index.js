@@ -12,28 +12,41 @@ import { Background } from '../../components/background';
 import { withApollo } from 'react-apollo';
 import { errorAlert } from '../../utils/API/errorHandle';
 import { CHAT_USERS_QUERY } from '../../utils/Apollo/Queries/user';
-import { strikethrough } from 'ansi-colors';
 import { PRIMARYCOLOR } from '../../constants/style';
+import Backend from '../../utils/Firebase/ChatUtil';
 
 let SCREEN_WIDTH = Dimensions.get('window').width;
 class Messages extends Component {
   constructor(props) {
     super(props);
+
     this.state = {
       text: "",
       refreshing: false,
       recorder: false,
       search: '',
       users: [],
-      flag: false
+      flag: false,
+
+      messages: null
     };
+    this.setLastMsgRef()
+  }
+  setLastMsgRef = () => {
+    Backend.setLastMsgRef(this.props.auth.user._id);
   }
   componentWillMount() {
     this.getChatList();
-
   }
   componentDidMount() {
+    Backend.loadUsers((messages) => {
+      this.setState({ messages });
+    })
   }
+  componentWillUnmount() {
+    Backend.closeUSersConnection();
+  }
+
   getChatList = async () => {
     this.setState({ flag: true });
     try {
@@ -69,7 +82,7 @@ class Messages extends Component {
     this.props.navigation.navigate('Chat', { user: item });
   }
   render() {
-    const { flag, users } = this.state;
+    const { flag, users, messages } = this.state;
     return (
       <Container style={{ paddingTop: StatusBar.currentHeight }}>
         <Background height={200} end={'transparent'} />
@@ -92,7 +105,7 @@ class Messages extends Component {
             } style={{ flex: 1 }}>
             <View style={{ width: SCREEN_WIDTH, marginTop: 10, paddingHorizontal: 10 }}>
               {users.map((item, index) => (
-                <CardUserMessage key={index} item={item} onPress={this.onTapUser} />
+                <CardUserMessage key={index} item={item} onPress={this.onTapUser} last={messages && messages[item._id] ? messages[item._id].last.message : ''} time={messages && messages[item._id] ? messages[item._id].last.updatedAt : ''} unRead={messages && messages[item._id] ? messages[item._id].last.received : true} />
               ))}
 
             </View>
