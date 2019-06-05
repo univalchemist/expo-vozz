@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "582031120672",
+    "firebase_url": "https://clever-cortex-235707.firebaseio.com",
+    "project_id": "clever-cortex-235707",
+    "storage_bucket": "clever-cortex-235707.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:582031120672:android:566319a3e7e0984b",
+        "android_client_info": {
+          "package_name": "com.black.vozz"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "582031120672-v4eiqqh7c52q9m9gab19378lm4e4h1h8.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD2CEB0HVE7-xfyJLLoSFcDydO1c3E0YZU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "582031120672-v4eiqqh7c52q9m9gab19378lm4e4h1h8.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

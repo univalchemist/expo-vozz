@@ -7,7 +7,7 @@ import SwitchButton from 'switch-button-react-native';
 import Swiper from 'react-native-swiper';
 import { connect } from 'react-redux';
 import { withApollo } from 'react-apollo';
-import { updateProgressFlag } from '../../actions/index'
+import { updateProgressFlag, fetchChatList } from '../../actions/index'
 
 import images from '../../../assets/'
 import { styles } from './style';
@@ -22,6 +22,7 @@ import { SearchBarCustom } from '../../components/searchBar';
 import { ALL_CATEGORY_QUERY } from '../../utils/Apollo/Queries/category';
 import { errorAlert } from '../../utils/API/errorHandle';
 import { TRENDS_QUERY } from '../../utils/Apollo/Queries/user';
+import Backend from '../../utils/Firebase/ChatUtil';
 
 const SCREEN_WIDTH = Dimensions.get('window').width
 
@@ -45,10 +46,11 @@ class Home extends Component {
             activeSwitch: 1
         };
     }
-
-    componentDidMount() {
-        this.getFeatured();
-        this.getTrends();
+    async componentDidMount() {
+        await this.getFeatured();
+        await this.getTrends();
+    }
+    componentWillUnmount() {
     }
     getFeatured = async () => {
         this.props.dispatch(updateProgressFlag(true));

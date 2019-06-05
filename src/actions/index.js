@@ -10,7 +10,8 @@ import {
     MOMENTS_NEED_REFRESH,
     TAB_INDEX,
     UPDATE_USERDATA,
-    SHOW_FLAG
+    SHOW_FLAG,
+    CHAT_LIST
 } from "../constants/action-types"
 import constantes from '../utils/constantes';
 import { FileSystem } from "expo";
@@ -133,7 +134,7 @@ export function saveHashtags(payload, moment_id) {
             .then((response) => {
                 dispatch(updateProgressFlag(false));
                 dispatch(momentsNeedRefresh(true))
-                dispatch(fetchLastMoments({apolloClient: payload.client, user: payload.auth.user}))
+                dispatch(fetchLastMoments({ apolloClient: payload.client, user: payload.auth.user }))
                 dispatch(showHashtags({ show: false }))
             })
             .catch((error) => {
@@ -231,4 +232,23 @@ export function updateProfileStore(id) {
     }
 
 
+}
+export function registerPushToken(id, token, pushToken) {
+    return dispatch => {
+        updateProfile(id, token, { puskToken: pushToken })
+            .then((response) => {
+                console.log('registerPushToken response', JSON.stringify(response));
+                dispatch(updateUserdata(response.data));
+                AsyncStorage.setItem('user', JSON.stringify(response.data));
+            })
+            .catch((error) => {
+                this.props.dispatch(updateProgressFlag(false));
+                let errorResponse = error.response.data;
+                console.log('registerPushToken error', JSON.stringify(errorResponse));
+            })
+    }
+}
+
+export function fetchChatList(payload) {
+    return { type: CHAT_LIST, payload }
 }

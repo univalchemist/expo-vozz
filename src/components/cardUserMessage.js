@@ -7,20 +7,22 @@ import { FONT } from '../constants/style';
 import { LastMsgTime } from '../utils/Date';
 const CardUserMessage = (props) => (
 
-    <TouchableHighlight underlayColor="#ffffff00" style={[styles.shadow, styles.container]} onPress={() => props.onPress(props.item)}>
+    <TouchableHighlight underlayColor="#ffffff00" style={[styles.shadow, styles.container]} onPress={() => props.onPress(props.user)}>
         <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
             <Image
                 style={{ width: 60, height: 60, borderRadius: 30 }}
-                source={props.item.profile_base64 ? ({ uri: `data:image/png;base64,${props.item.profile_base64}` }) : (images.default_avatar)}
+                source={props.user.profile_base64 ? ({ uri: `data:image/png;base64,${props.user.profile_base64}` }) : (images.default_avatar)}
             />
             <View style={styles.textPart} >
-                <Text style={{ fontSize: 20, fontFamily: FONT.BOOK }}>{props.item.username}</Text>
-                <Text style={{ fontFamily: FONT.BOOK, color: 'grey' }}>{props.last}</Text>
+                <Text style={{ fontSize: 20, fontFamily: FONT.BOOK }}>{props.user.username}</Text>
+                <Text style={{ fontFamily: FONT.BOOK, color: 'grey' }}>{props.last ? props.last.last.message : ''}</Text>
             </View>
-            <View style={{ padding: 0, justifyContent: 'center', alignItems: 'flex-end' }}>
-                <Icon active type='Entypo' name="dot-single" style={{ color: props.unRead ? 'grey' : 'red' }} />
-                <Text style={{ fontFamily: FONT.BOOK, color: 'grey', fontSize: 10 }}>{props.time?LastMsgTime(new Date(props.time)):''}</Text>
-            </View>
+            {props.last &&
+                <View style={{ padding: 0, justifyContent: 'center', alignItems: 'flex-end' }}>
+                    <Icon active type='Entypo' name="dot-single" style={{ color: props.last.last.received ? 'grey' : 'red' }} />
+                    <Text style={{ fontFamily: FONT.BOOK, color: 'grey', fontSize: 10 }}>{props.last.last.updatedAt ? LastMsgTime(new Date(props.last.last.updatedAt)) : ''}</Text>
+                </View>
+            }
         </View>
     </TouchableHighlight>
 );

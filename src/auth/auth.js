@@ -13,14 +13,14 @@ import { getProfile } from '../utils/API/userAction';
 import { PRIMARYCOLOR } from '../constants/style';
 import { withApollo } from 'react-apollo';
 import { registerForPushNotificationsAsync } from '../constants/funcs';
-
+import Backend from '../utils/Firebase/ChatUtil';
 class Login extends Component {
   constructor(props) {
     super(props);
-    this.checkauth();
+    this.checkAuth();
   }
 
-  checkauth = async () => {
+  checkAuth = async () => {
     try {
       const user = JSON.parse(await AsyncStorage.getItem('user'));
       const token = await AsyncStorage.getItem('jwt');
@@ -37,6 +37,9 @@ class Login extends Component {
             this.props.dispatch(fetchLastMoments({ jwt: token, user: data1, apolloClient }));
             console.log({ user: data1 });
             AsyncStorage.setItem('user', JSON.stringify(data1));
+            Backend.setChatListRef(data1._id);
+            Backend.fetchChatUsers(this.props.dispatch)
+            
             this.props.navigation.navigate({
               routeName: 'Home',
             })

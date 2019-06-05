@@ -27,7 +27,7 @@ import { Background } from '../../components/background';
 import MusicPlayer from '../../utils/Audio';
 import { calDiffHours } from '../../utils/Date';
 import { LAST_MOMENT_QUERY } from '../../utils/Apollo/Queries/moment';
-
+import Backend from '../../utils/Firebase/ChatUtil'
 const { height, width } = Dimensions.get('window');
 const SLIDING_UP_PANEL_HEIGHT = Platform.select({
     // The issue doesn't affect iOS
@@ -173,8 +173,19 @@ class UserProfile extends React.Component {
     menuTapPrivateMessage = () => {
         this._menu.hide();
         console.log('menuTapPrivateMessage');
-        this.props.navigation.navigate('Chat', { user: { url: 'https://images.pexels.com/photos/1250643/pexels-photo-1250643.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260', name: 'LiGwang', last: 'Not today', unRead: false } });
+        const { user } = this.state;
+        const { auth, chatListKeys } = this.props;
+        if (chatListKeys == null || !this.checkExistChat(user._id, chatListKeys)) {
+            console.log('ligwang chat list is null or not exist')
+            Backend.addChatList(auth.user, user);
+            this.props.navigation.navigate('Chat', { user: user });
+            return;
+        }
+        this.props.navigation.navigate('Chat', { user: user });
     };
+    checkExistChat = (userId, chatListKeys) => {
+        return chatListKeys.filter(c => c == userId).length > 0 ? true : false
+    }
     menuTapReport = () => {
         this._menu.hide();
         console.log('menuTapReport')
@@ -515,6 +526,7 @@ class UserProfile extends React.Component {
     }
 }
 const mapStateToProps = (state) => ({
-    auth: state.auth
+    auth: state.auth,
+    chatListKeys: state.messages.chatListKeys
 });
 export default withApollo(connect(mapStateToProps)(UserProfile))

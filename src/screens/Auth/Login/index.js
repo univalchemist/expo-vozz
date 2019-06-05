@@ -11,6 +11,7 @@ import { Background } from '../../../components/background'
 import { styles } from './style';
 import { SignIn, forgetPassword, getProfile } from '../../../utils/API/userAction';
 import { errorAlert } from '../../../utils/API/errorHandle';
+import Backend from '../../../utils/Firebase/ChatUtil';
 let SCREEN_WIDTH = Dimensions.get('window').width
 
 class Login extends Component {
@@ -92,7 +93,8 @@ class Login extends Component {
                             this.props.dispatch(saveAuthdata({ jwt: data.jwt, user: data1 }));
                             AsyncStorage.setItem('jwt', data.jwt);
                             AsyncStorage.setItem('user', JSON.stringify(data1));
-
+                            Backend.setChatListRef(data1._id);
+                            Backend.fetchChatUsers(this.props.dispatch)
                             if (data.jwt) { this.props.navigation.navigate('Home') }
                         })
                         .catch((error) => {

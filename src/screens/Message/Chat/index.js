@@ -181,7 +181,7 @@ class Chat extends Component {
                     visible={flag}
                     textContent={""}
                 />
-                <HeaderContainer title={user.username} goBack={true} navigation={this.props.navigation} avatar={true} uri={user.url} right={false} />
+                <HeaderContainer title={user.username} goBack={true} navigation={this.props.navigation} avatar={true} uri={user.profile_base64} right={false} />
                 <Content contentContainerStyle={styles.contentStyle}>
                     <View style={{ flex: 1, paddingBottom: getBottomSpace() }} accessible accessibilityLabel="main" testID="main">
                         <GiftedChat

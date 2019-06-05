@@ -30,7 +30,7 @@ export const HeaderContainer = (props) => {
                 }
                 {
                     props.avatar &&
-                    <Thumbnail small style={{ alignSelf: 'center' }} source={props.uri ? ({uri: props.uri}) : images.default_avatar} />
+                    <Thumbnail small style={{ alignSelf: 'center' }} source={props.uri ? ({ uri: `data:image/png;base64,${props.uri}`}) : images.default_avatar} />
                 }
 
             </Left>

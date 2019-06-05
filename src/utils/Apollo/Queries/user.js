@@ -122,3 +122,12 @@ export const TRENDS_QUERY = gql`query user($id: ID!) {
         }
       }
 }`;
+export const CHAT_LIST_USERS = gql`query users($ids: [String!]) {
+  users(where: {_id: $ids}) {
+        _id
+        username
+        full_name
+        pushToken
+        profile_base64
+      }
+}`;

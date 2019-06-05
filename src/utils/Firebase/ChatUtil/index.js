@@ -1,4 +1,5 @@
 import firebase from 'firebase';
+import { fetchChatList } from '../../../actions';
 
 class Backend {
     uid = '';
@@ -8,7 +9,7 @@ class Backend {
 
     senderRef = null;
     receiverRef = null;
-    lastMsgRef = null;
+    chatListRef = null;
     // initialize Firebase Backend
     constructor() {
         firebase.initializeApp({
@@ -42,8 +43,8 @@ class Backend {
         this.senderRef = firebase.database().ref('users').child(sender._id).child(user._id);
         this.receiverRef = firebase.database().ref('users').child(user._id).child(sender._id);
     }
-    setLastMsgRef(id) {
-        this.lastMsgRef = firebase.database().ref('users').child(id);
+    setChatListRef(id) {
+        this.chatListRef = firebase.database().ref('users').child(id);
     }
     // retrieve the messages from the Backend
     loadMessages(callback) {
@@ -75,14 +76,14 @@ class Backend {
                 user: message[i].user,
                 createdAt: firebase.database.ServerValue.TIMESTAMP,
             });
-            this.receiverRef.set({
+            this.receiverRef.update({
                 last: {
                     message: message[i].text,
                     updatedAt: firebase.database.ServerValue.TIMESTAMP,
                     received: false
                 },
             });
-            this.senderRef.set({
+            this.senderRef.update({
                 last: {
                     message: message[i].text,
                     updatedAt: firebase.database.ServerValue.TIMESTAMP,
@@ -96,7 +97,10 @@ class Backend {
         ref.once('value', snapshot => {
             const message = snapshot.val()
             console.log({ lastMessage: message });
-            ref.set({
+            if (message == null || message.last == null || message.last.received == true) {
+                return;
+            }
+            ref.update({
                 last: {
                     message: message.last.message,
                     updatedAt: firebase.database.ServerValue.TIMESTAMP,
@@ -112,18 +116,31 @@ class Backend {
         }
     }
 
-    loadUsers(callback) {
-        this.lastMsgRef.off();
-        const onReceive = (data) => {
-            const user = data.val();
-            callback(user);
+    fetchChatUsers(dispatch) {
+        this.chatListRef.off();
+        const onReceive = (snapshot) => {
+            const keys = [];
+            snapshot.forEach(function (childSnap) {
+                keys.push(childSnap.key);
+            });
+            dispatch(fetchChatList({ chatList: snapshot.val(), chatListKeys: keys }));
         };
-        this.lastMsgRef.on('value', onReceive);
+        this.chatListRef.on('value', onReceive);
     }
     closeUSersConnection() {
-        if (this.lastMsgRef) {
-            this.lastMsgRef.off();
+        if (this.chatListRef) {
+            this.chatListRef.off();
         }
+    }
+    addChatList(sender, user) {
+        const sender_ref = firebase.database().ref('users').child(sender._id).child(user._id);
+        const receiver_ref = firebase.database().ref('users').child(user._id).child(sender._id);
+        sender_ref.set({
+            last: null,
+        });
+        receiver_ref.set({
+            last: null,
+        });
     }
 }
 export default new Backend();

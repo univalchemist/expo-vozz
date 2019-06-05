@@ -32,6 +32,7 @@
     },
     "android": {
       "package": "com.black.vozz",
+      "googleServicesFile": "./google-services.json",
       "config": {
         "googleMaps": {
           "apiKey": "AIzaSyCYqgtYl0I4YhrGygDQGV7MoaP85Fz61t0"

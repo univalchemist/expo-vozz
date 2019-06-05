@@ -11,7 +11,7 @@ import { TextView } from '../../components/textView';
 import { Background } from '../../components/background';
 import { withApollo } from 'react-apollo';
 import { errorAlert } from '../../utils/API/errorHandle';
-import { CHAT_USERS_QUERY } from '../../utils/Apollo/Queries/user';
+import { CHAT_USERS_QUERY, CHAT_LIST_USERS } from '../../utils/Apollo/Queries/user';
 import { PRIMARYCOLOR } from '../../constants/style';
 import Backend from '../../utils/Firebase/ChatUtil';
 
@@ -23,40 +23,46 @@ class Messages extends Component {
     this.state = {
       text: "",
       refreshing: false,
-      recorder: false,
-      search: '',
-      users: [],
       flag: false,
-
-      messages: null
+      chatList: this.props.chatList,
+      chatListKeys: this.props.chatListKeys,
+      chatListProfile: null
     };
-    this.setLastMsgRef()
-  }
-  setLastMsgRef = () => {
-    Backend.setLastMsgRef(this.props.auth.user._id);
+    this.getChatListProfile(this.props.chatListKeys);
   }
   componentWillMount() {
-    this.getChatList();
   }
   componentDidMount() {
-    Backend.loadUsers((messages) => {
-      this.setState({ messages });
-    })
   }
   componentWillUnmount() {
-    Backend.closeUSersConnection();
   }
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.chatList !== this.props.chatList) {
 
-  getChatList = async () => {
-    this.setState({ flag: true });
+      this.setState({
+        chatList: nextProps.chatList
+      });
+    }
+    if (nextProps.chatListKeys !== this.props.chatListKeys) {
+
+      this.setState({
+        chatListKeys: nextProps.chatListKeys
+      });
+      this.getChatListProfile(nextProps.chatListKeys);
+    }
+  }
+  getChatListProfile = async (chatListKeys) => {
+    if (chatListKeys ==  null) return;
     try {
-      let res = await this.props.client.query({ query: CHAT_USERS_QUERY, fetchPolicy: 'network-only' });
-      let users = this.removeMe(res.data.users);
-      console.log({ users });
-      this.setState({ users, flag: false });
+      let res = await this.props.client.query({ query: CHAT_LIST_USERS, fetchPolicy: 'network-only', variables: { ids: chatListKeys } });
+      let lists = res.data.users;
+      console.log({ lists })
+      this.setState({
+        chatListProfile: lists
+      });
     } catch (e) {
-      this.setState({ flag: false });
-      console.log({ getChatList: e });
+      this.props.dispatch(updateProgressFlag(false));
+      console.log({ getChatListProfile: e });
       errorAlert('Network error. Please make sure your network is connected.')
     }
   }
@@ -69,20 +75,12 @@ class Messages extends Component {
     this.setState({ refreshing: true });
     setTimeout(this.setState({ refreshing: false }), 30000)
   }
-
-  updateSearch = (search) => {
-    console.log(search)
-    this.setState({ search });
-  };
-  _onTextClear = () => {
-
-  }
-  onTapUser = (item) => {
-    console.log("onTapUser", item);
-    this.props.navigation.navigate('Chat', { user: item });
+  onTapUser = (user) => {
+    console.log("onTapUser", user);
+    this.props.navigation.navigate('Chat', { user: user });
   }
   render() {
-    const { flag, users, messages } = this.state;
+    const { flag, chatList, chatListProfile } = this.state;
     return (
       <Container style={{ paddingTop: StatusBar.currentHeight }}>
         <Background height={200} end={'transparent'} />
@@ -104,8 +102,8 @@ class Messages extends Component {
               />
             } style={{ flex: 1 }}>
             <View style={{ width: SCREEN_WIDTH, marginTop: 10, paddingHorizontal: 10 }}>
-              {users.map((item, index) => (
-                <CardUserMessage key={index} item={item} onPress={this.onTapUser} last={messages && messages[item._id] ? messages[item._id].last.message : ''} time={messages && messages[item._id] ? messages[item._id].last.updatedAt : ''} unRead={messages && messages[item._id] ? messages[item._id].last.received : true} />
+              {chatList != null && chatListProfile != null && chatListProfile.map((item, index) => (
+                <CardUserMessage key={index} user={item} last={chatList[`${item._id}`]} onPress={this.onTapUser} />
               ))}
 
             </View>
@@ -116,6 +114,9 @@ class Messages extends Component {
   }
 }
 const mapStateToProps = (state) => ({
-  auth: state.auth
+  auth: state.auth,
+  chatList: state.messages.chatList,
+  chatListKeys: state.messages.chatListKeys
+
 });
 export default withApollo(connect(mapStateToProps)(Messages));
