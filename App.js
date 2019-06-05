@@ -6,7 +6,6 @@ import { ApolloProvider } from 'react-apollo'
 import store from './src/store/index'
 import ReduxApp from './ReduxApp'
 import client from './src/utils/Apollo/setup';
-import Backend from './src/utils/Firebase/ChatUtil'
 import _ from 'lodash';
 export default class YourApp extends React.Component {
 
@@ -36,13 +35,8 @@ export default class YourApp extends React.Component {
     this.setState({ loading: false });
   }
   componentDidMount() {
-    // Backend.loadUsers((users) => {
-    //   console.log('=============================')
-    //   console.log({ App_firebaseMessage: users });
-    // });
   }
   componentWillUnmount() {
-    // Backend.closeUSersConnection();
   }
   render() {
     if (this.state.loading) {

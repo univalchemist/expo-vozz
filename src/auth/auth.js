@@ -12,6 +12,7 @@ import { saveAuthdata, fetchLastMoments } from '../actions';
 import { getProfile } from '../utils/API/userAction';
 import { PRIMARYCOLOR } from '../constants/style';
 import { withApollo } from 'react-apollo';
+import { registerForPushNotificationsAsync } from '../constants/funcs';
 
 class Login extends Component {
   constructor(props) {
@@ -23,6 +24,9 @@ class Login extends Component {
     try {
       const user = JSON.parse(await AsyncStorage.getItem('user'));
       const token = await AsyncStorage.getItem('jwt');
+
+      const pushToken = await registerForPushNotificationsAsync();
+      console.log({pushToken});
       if (user && token) {
 
         getProfile(user._id)
