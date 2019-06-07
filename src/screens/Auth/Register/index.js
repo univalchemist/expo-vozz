@@ -46,9 +46,10 @@ class Register extends Component {
 
     handleRegistro = () => {
         const { username, email, password, password2 } = this.state;
+        const { pushToken } = this.props.notification
         if (password === password2 && password.length >= 6 && username.length > 0 && email.length > 0 && this.validateEmail(email)) {
             this.props.dispatch(updateProgressFlag(true));
-            RegisterUser({ username, email, password })
+            RegisterUser({ username, email, password, pushToken })
                 .then((response) => {
                     this.props.dispatch(updateProgressFlag(false));
                     console.log('RegisterUser', JSON.stringify(response));
@@ -204,4 +205,7 @@ class Register extends Component {
     }
     //}
 }
-export default connect()(Register)
+const mapStateToProps = (state) => ({
+    notification: state.notification
+});
+export default connect(mapStateToProps)(Register)

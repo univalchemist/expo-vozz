@@ -96,7 +96,6 @@ class Backend {
         const ref = firebase.database().ref('users').child(sender_id).child(user_id);
         ref.once('value', snapshot => {
             const message = snapshot.val()
-            console.log({ lastMessage: message });
             if (message == null || message.last == null || message.last.received == true) {
                 return;
             }

@@ -11,7 +11,8 @@ import {
     TAB_INDEX,
     UPDATE_USERDATA,
     SHOW_FLAG,
-    CHAT_LIST
+    CHAT_LIST,
+    PUSH_TOKEN
 } from "../constants/action-types"
 import constantes from '../utils/constantes';
 import { FileSystem } from "expo";
@@ -20,6 +21,7 @@ import { updateMoment } from "../utils/API/moment";
 import { TAG_QUERY } from "../utils/Apollo/Queries/tag";
 import { updateProfile, getProfile } from "../utils/API/userAction";
 import { LAST_MOMENT_QUERY } from '../utils/Apollo/Queries/moment';
+import { sendNotification } from '../utils/API/notification';
 
 export function uploadRecording(payload) {
     return dispatch => {
@@ -161,7 +163,6 @@ export function fetchLastMoments(payload) {
         try {
             let res = await payload.apolloClient.query({ query: LAST_MOMENT_QUERY, fetchPolicy: 'network-only', variables: { id: payload.user._id } });
             let lasts = res.data.moments;
-            console.log({ lasts })
             dispatch(receiveLastMoments(lasts))
             dispatch(momentsNeedRefresh(false))
         } catch (e) {
@@ -233,16 +234,19 @@ export function updateProfileStore(id) {
 
 
 }
+
+export function savePushToken(payload) {
+    return { type: PUSH_TOKEN, payload }
+}
 export function registerPushToken(id, token, pushToken) {
     return dispatch => {
-        updateProfile(id, token, { puskToken: pushToken })
+        updateProfile(id, token, { pushToken: pushToken })
             .then((response) => {
                 console.log('registerPushToken response', JSON.stringify(response));
                 dispatch(updateUserdata(response.data));
                 AsyncStorage.setItem('user', JSON.stringify(response.data));
             })
             .catch((error) => {
-                this.props.dispatch(updateProgressFlag(false));
                 let errorResponse = error.response.data;
                 console.log('registerPushToken error', JSON.stringify(errorResponse));
             })
@@ -251,4 +255,15 @@ export function registerPushToken(id, token, pushToken) {
 
 export function fetchChatList(payload) {
     return { type: CHAT_LIST, payload }
+}
+export const sendNotificationToUser = (pushToken, userName, message) => {
+    return dispatch => {
+        sendNotification(pushToken, userName, message)
+            .then((response) => {
+                console.log('sendNotificationResponse', response.data.data)
+            })
+            .catch((error) => {
+                console.log('sendNotificationError', error)
+            })
+    }
 }

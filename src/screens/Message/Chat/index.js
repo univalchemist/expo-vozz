@@ -20,6 +20,8 @@ import { PRIMARYCOLOR } from '../../../constants/style';
 import Backend from '../../../utils/Firebase/ChatUtil';
 import { withApollo } from 'react-apollo';
 import _ from 'lodash';
+import { sendNotification } from '../../../utils/API/notification';
+import { sendNotificationToUser } from '../../../actions';
 
 class Chat extends Component {
     constructor(props) {
@@ -55,18 +57,19 @@ class Chat extends Component {
         Backend.updateMsgStatus(sender._id, user._id)
     }
     componentDidMount() {
-        const { user, sender } = this.state;
         Backend.loadMessages((message) => {
             this.setState((previousState) => {
                 return {
                     messages: GiftedChat.append(previousState.messages, message),
                 };
             });
-            Backend.updateMsgStatus(sender._id, user._id)
+
         });
     }
     componentWillUnmount() {
+        const { user, sender } = this.state;
         this._isMounted = false;
+        Backend.updateMsgStatus(sender._id, user._id)
         Backend.closeChat();
     }
     onLoadEarlier = () => {
@@ -172,6 +175,11 @@ class Chat extends Component {
         }
         return null;
     };
+    onSendMessage = (message) => {
+        const { user } = this.state;
+        Backend.sendMessage(message);
+        this.props.dispatch(sendNotificationToUser(user.pushToken, this.props.auth.user.username, message[0].text));
+    }
     render() {
         const { flag, user, receiver, sender } = this.state;
         return (
@@ -186,9 +194,7 @@ class Chat extends Component {
                     <View style={{ flex: 1, paddingBottom: getBottomSpace() }} accessible accessibilityLabel="main" testID="main">
                         <GiftedChat
                             messages={this.state.messages}
-                            onSend={(message) => {
-                                Backend.sendMessage(message);
-                            }}
+                            onSend={(message) => this.onSendMessage(message)}
                             keyboardShouldPersistTaps="never"
                             // loadEarlier={this.state.loadEarlier}
                             // onLoadEarlier={this.onLoadEarlier}

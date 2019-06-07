@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { AsyncStorage, Image, KeyboardAvoidingView, TouchableOpacity, View, SafeAreaView, Dimensions, Alert } from 'react-native';
 import { Item, Icon, Button } from 'native-base';
-import { saveAuthdata, updateProgressFlag } from '../../../actions/index'
+import { saveAuthdata, updateProgressFlag, savePushToken, registerPushToken } from '../../../actions/index'
 import { connect } from 'react-redux';
 
 import { InputText } from '../../../components/inputText'
@@ -12,6 +12,7 @@ import { styles } from './style';
 import { SignIn, forgetPassword, getProfile } from '../../../utils/API/userAction';
 import { errorAlert } from '../../../utils/API/errorHandle';
 import Backend from '../../../utils/Firebase/ChatUtil';
+import { registerForPushNotificationsAsync } from '../../../constants/funcs';
 let SCREEN_WIDTH = Dimensions.get('window').width
 
 class Login extends Component {
@@ -35,11 +36,18 @@ class Login extends Component {
             password_success: false,
             password_error: false,
             flag: false,
+            pushToken: ''
         }
         this.forgotPassword = this.forgotPassword.bind(this);
     }
 
     async componentDidMount() {
+        const pushToken = await registerForPushNotificationsAsync();
+        console.log({ pushToken });
+        if (pushToken) {
+            this.setState({ pushToken });
+            this.props.dispatch(savePushToken(pushToken))
+        }
     }
 
     forgotPassword() {
@@ -91,6 +99,9 @@ class Login extends Component {
                             let data1 = response1.data;
                             this.props.dispatch(updateProgressFlag(false));
                             this.props.dispatch(saveAuthdata({ jwt: data.jwt, user: data1 }));
+                            if (this.state.pushToken) {
+                                this.props.dispatch(registerPushToken(data.user._id, data.jwt, this.state.pushToken));
+                            }
                             AsyncStorage.setItem('jwt', data.jwt);
                             AsyncStorage.setItem('user', JSON.stringify(data1));
                             Backend.setChatListRef(data1._id);

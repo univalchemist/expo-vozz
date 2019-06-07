@@ -45,6 +45,7 @@
     "react-native-maps": "^0.22.1",
     "react-native-material-dropdown": "^0.11.1",
     "react-native-material-menu": "^0.4.2",
+    "react-native-push-notification-popup": "^1.2.0",
     "react-native-slider": "^0.11.0",
     "react-native-sortable-list": "0.0.22",
     "react-native-soundcloud-waveform": "^1.0.2",

@@ -1,12 +1,14 @@
 import React from 'react';
 import { StyleSheet, YellowBox } from 'react-native';
 import { Provider } from 'react-redux'
-import { Font, AppLoading } from "expo";
+import { Font, AppLoading, Notifications } from "expo";
 import { ApolloProvider } from 'react-apollo'
+import NotificationPopup from 'react-native-push-notification-popup';
 import store from './src/store/index'
 import ReduxApp from './ReduxApp'
 import client from './src/utils/Apollo/setup';
 import _ from 'lodash';
+import images from './assets';
 export default class YourApp extends React.Component {
 
   constructor(props) {
@@ -19,7 +21,7 @@ export default class YourApp extends React.Component {
     };
     super(props);
     this.state = {
-      loading: true
+      loading: true,
     }
   }
   async componentWillMount() {
@@ -35,9 +37,28 @@ export default class YourApp extends React.Component {
     this.setState({ loading: false });
   }
   componentDidMount() {
+    console.log("App didmount")
+    this._notificationSubscription = Notifications.addListener(this._handleNotification);
   }
   componentWillUnmount() {
+    console.log("App WillUnmount")
   }
+  _handleNotification = (notification) => {
+    console.log({ notification });
+    if (notification.remote == true && notification.origin == 'received') {
+
+      this.popup.show({
+        onPress: function () { console.log('Pressed') },
+        appIconSource: images.appIcon,
+        appTitle: 'Vozz',
+        timeText: 'Now',
+        title: notification.data.title,
+        body: notification.data.body
+      });
+
+    }
+
+  };
   render() {
     if (this.state.loading) {
       return (
@@ -48,6 +69,7 @@ export default class YourApp extends React.Component {
       <ApolloProvider client={client}>
         <Provider store={store}>
           <ReduxApp />
+          <NotificationPopup ref={ref => this.popup = ref} />
         </Provider>
       </ApolloProvider>
     );

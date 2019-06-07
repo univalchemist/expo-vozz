@@ -87,9 +87,6 @@ class Home extends Component {
                 console.log({ getTrends: e });
             }
         }));
-        console.log({ async });
-        console.log({ temp_routes });
-        console.log({ temp_experiences });
         this.setState({
             trend_routes: temp_routes,
             trend_experiences: temp_experiences

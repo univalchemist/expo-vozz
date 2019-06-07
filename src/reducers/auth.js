@@ -1,6 +1,6 @@
 import {
     SAVE_AUTHDATA,
-    UPDATE_USERDATA
+    UPDATE_USERDATA,
 } from "../constants/action-types";
 
 const initialState = {}
@@ -10,7 +10,7 @@ export default function authReducer(state = initialState, action) {
         case SAVE_AUTHDATA:
             return { ...action.payload }
         case UPDATE_USERDATA:
-            return {...state, user: action.payload }
+            return { ...state, user: action.payload }
         default:
             return state
     }

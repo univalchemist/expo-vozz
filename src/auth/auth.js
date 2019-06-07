@@ -8,7 +8,7 @@ import {
   SkypeIndicator,
 } from 'react-native-indicators';
 import { connect } from 'react-redux';
-import { saveAuthdata, fetchLastMoments } from '../actions';
+import { saveAuthdata, fetchLastMoments, savePushToken } from '../actions';
 import { getProfile } from '../utils/API/userAction';
 import { PRIMARYCOLOR } from '../constants/style';
 import { withApollo } from 'react-apollo';
@@ -24,9 +24,12 @@ class Login extends Component {
     try {
       const user = JSON.parse(await AsyncStorage.getItem('user'));
       const token = await AsyncStorage.getItem('jwt');
-
+      const storagePushToken = await AsyncStorage.getItem('pushToken');
       const pushToken = await registerForPushNotificationsAsync();
-      console.log({pushToken});
+      console.log({ pushToken });
+      if (pushToken) {
+        this.props.dispatch(savePushToken(pushToken))
+      }
       if (user && token) {
 
         getProfile(user._id)
@@ -35,11 +38,10 @@ class Login extends Component {
             let apolloClient = this.props.client;
             this.props.dispatch(saveAuthdata({ jwt: token, user: data1 }));
             this.props.dispatch(fetchLastMoments({ jwt: token, user: data1, apolloClient }));
-            console.log({ user: data1 });
             AsyncStorage.setItem('user', JSON.stringify(data1));
             Backend.setChatListRef(data1._id);
             Backend.fetchChatUsers(this.props.dispatch)
-            
+
             this.props.navigation.navigate({
               routeName: 'Home',
             })

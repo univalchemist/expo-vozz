@@ -52,11 +52,10 @@ class Messages extends Component {
     }
   }
   getChatListProfile = async (chatListKeys) => {
-    if (chatListKeys ==  null) return;
+    if (chatListKeys ==  null || chatListKeys.length == 0) return;
     try {
       let res = await this.props.client.query({ query: CHAT_LIST_USERS, fetchPolicy: 'network-only', variables: { ids: chatListKeys } });
       let lists = res.data.users;
-      console.log({ lists })
       this.setState({
         chatListProfile: lists
       });

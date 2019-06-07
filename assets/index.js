@@ -7,5 +7,6 @@ const images = {
     flag_blue: require('./flag-blue.png'),
     flag_pink: require('./flag-pink.png'),
     placeHolderMoment: require('./placeholder_moment.jpg'),
+    appIcon: require('./appicon.png'),
 }
 export default images;

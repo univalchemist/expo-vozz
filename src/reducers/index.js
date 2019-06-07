@@ -6,6 +6,7 @@ import player from './player'
 import tabIndex from './tabIndex'
 import progress from './progress'
 import messages from './messages'
+import notification from './notification'
 
 const rootReducer = combineReducers({
     recorder, 
@@ -14,7 +15,8 @@ const rootReducer = combineReducers({
     player,
     tabIndex,
     progress,
-    messages
+    messages,
+    notification
 })
 
 export default rootReducer;

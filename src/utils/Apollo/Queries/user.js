@@ -36,6 +36,7 @@ export const USERS_SEARCH_QUERY = gql`query users($search: String!) {
         countryCode
         phone
         countryName
+        pushToken
         comments{_id, message, route{_id}, experience{_id}}
         experiences{_id, title, description, image{url}, comments{_id}, plays{_id}, moments{_id}, tags{_id}, likes{_id}}
         moments{_id}
