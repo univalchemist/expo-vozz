@@ -174,18 +174,8 @@ class UserProfile extends React.Component {
         this._menu.hide();
         console.log('menuTapPrivateMessage');
         const { user } = this.state;
-        const { auth, chatListKeys } = this.props;
-        if (chatListKeys == null || !this.checkExistChat(user._id, chatListKeys)) {
-            console.log('ligwang chat list is null or not exist')
-            Backend.addChatList(auth.user, user);
-            this.props.navigation.navigate('Chat', { user: user });
-            return;
-        }
         this.props.navigation.navigate('Chat', { user: user });
     };
-    checkExistChat = (userId, chatListKeys) => {
-        return chatListKeys.filter(c => c == userId).length > 0 ? true : false
-    }
     menuTapReport = () => {
         this._menu.hide();
         console.log('menuTapReport')

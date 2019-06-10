@@ -37,12 +37,6 @@ class Messages extends Component {
   componentWillUnmount() {
   }
   componentWillReceiveProps(nextProps) {
-    if (nextProps.chatList !== this.props.chatList) {
-
-      this.setState({
-        chatList: nextProps.chatList
-      });
-    }
     if (nextProps.chatListKeys !== this.props.chatListKeys) {
 
       this.setState({
@@ -52,10 +46,14 @@ class Messages extends Component {
     }
   }
   getChatListProfile = async (chatListKeys) => {
-    if (chatListKeys ==  null || chatListKeys.length == 0) return;
+    if (chatListKeys == null || chatListKeys.length == 0) return;
+    let keys = [];
+    chatListKeys.map(k => keys.push(k.key));
+    console.log({ keys });
     try {
-      let res = await this.props.client.query({ query: CHAT_LIST_USERS, fetchPolicy: 'network-only', variables: { ids: chatListKeys } });
+      let res = await this.props.client.query({ query: CHAT_LIST_USERS, fetchPolicy: 'network-only', variables: { ids: keys } });
       let lists = res.data.users;
+      console.log({ lists });
       this.setState({
         chatListProfile: lists
       });
@@ -65,10 +63,13 @@ class Messages extends Component {
       errorAlert('Network error. Please make sure your network is connected.')
     }
   }
-  removeMe = (array) => {
-    let id = this.props.auth.user._id;
-    let filteredArray = array.filter(item => item._id !== id)
-    return filteredArray;
+  userMessage = (userId) => {
+    const { chatListKeys } = this.state;
+    let filteredArray = chatListKeys.filter(item => item.key == userId);
+    const last = filteredArray[0]['messages'][filteredArray[0].messages.length - 1]['message']['text'];
+    const unRead = filteredArray[0].unRead;
+    const createdAt = filteredArray[0]['messages'][filteredArray[0].messages.length - 1]['message']['createdAt'];
+    return ({ last, unRead, createdAt });
   }
   _onRefresh = () => {
     this.setState({ refreshing: true });
@@ -101,8 +102,8 @@ class Messages extends Component {
               />
             } style={{ flex: 1 }}>
             <View style={{ width: SCREEN_WIDTH, marginTop: 10, paddingHorizontal: 10 }}>
-              {chatList != null && chatListProfile != null && chatListProfile.map((item, index) => (
-                <CardUserMessage key={index} user={item} last={chatList[`${item._id}`]} onPress={this.onTapUser} />
+              {chatListProfile != null && chatListProfile.map((item, index) => (
+                <CardUserMessage key={index} user={item} message={this.userMessage(item._id)} onPress={this.onTapUser} />
               ))}
 
             </View>

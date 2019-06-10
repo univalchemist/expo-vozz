@@ -44,9 +44,8 @@ export default class YourApp extends React.Component {
     console.log("App WillUnmount")
   }
   _handleNotification = (notification) => {
-    console.log({ notification });
-    if (notification.remote == true && notification.origin == 'received') {
-
+    const chatScreen = store.getState().messages.chatScreen;
+    if (notification.remote == true && notification.origin == 'received' && !chatScreen) {
       this.popup.show({
         onPress: function () { console.log('Pressed') },
         appIconSource: images.appIcon,

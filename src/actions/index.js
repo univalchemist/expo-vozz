@@ -12,7 +12,8 @@ import {
     UPDATE_USERDATA,
     SHOW_FLAG,
     CHAT_LIST,
-    PUSH_TOKEN
+    PUSH_TOKEN,
+    CHAT_SCREEN
 } from "../constants/action-types"
 import constantes from '../utils/constantes';
 import { FileSystem } from "expo";
@@ -255,6 +256,9 @@ export function registerPushToken(id, token, pushToken) {
 
 export function fetchChatList(payload) {
     return { type: CHAT_LIST, payload }
+}
+export function updateChatScreenState(payload) {
+    return { type: CHAT_SCREEN, payload }
 }
 export const sendNotificationToUser = (pushToken, userName, message) => {
     return dispatch => {

@@ -15,12 +15,12 @@ const CardUserMessage = (props) => (
             />
             <View style={styles.textPart} >
                 <Text style={{ fontSize: 20, fontFamily: FONT.BOOK }}>{props.user.username}</Text>
-                <Text style={{ fontFamily: FONT.BOOK, color: 'grey' }}>{props.last ? props.last.last.message : ''}</Text>
+                <Text style={{ fontFamily: FONT.BOOK, color: 'grey' }}>{props.message ? props.message.last : ''}</Text>
             </View>
-            {props.last &&
+            {props.message &&
                 <View style={{ padding: 0, justifyContent: 'center', alignItems: 'flex-end' }}>
-                    <Icon active type='Entypo' name="dot-single" style={{ color: props.last.last.received ? 'grey' : 'red' }} />
-                    <Text style={{ fontFamily: FONT.BOOK, color: 'grey', fontSize: 10 }}>{props.last.last.updatedAt ? LastMsgTime(new Date(props.last.last.updatedAt)) : ''}</Text>
+                    <Icon active type='Entypo' name="dot-single" style={{ color: props.message.unRead > 0 ? 'red' : 'grey' }} />
+                    <Text style={{ fontFamily: FONT.BOOK, color: 'grey', fontSize: 10 }}>{props.message.createdAt ? LastMsgTime(new Date(props.message.createdAt)) : ''}</Text>
                 </View>
             }
         </View>

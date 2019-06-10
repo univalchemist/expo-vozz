@@ -1,20 +1,23 @@
-import { 
-    CHAT_LIST, CHAT_LIST_NEED_REFRESH
+import {
+    CHAT_LIST, CHAT_LIST_NEED_REFRESH, CHAT_SCREEN
 } from "../constants/action-types";
 
 
 const initialState = {
-    chatList: null,
-    chatListKeys: null
+    chatScreen: false,
+    chatListKeys: null,
+    totalUnRead: 0
 }
 
 export default function messageReducer(state = initialState, action) {
     //console.log( action )
     switch (action.type) {
         case CHAT_LIST:
-            return {...state, chatList: action.payload.chatList, chatListKeys: action.payload.chatListKeys }
+            return { ...state, chatListKeys: action.payload.chatListKeys, totalUnRead: action.payload.totalUnRead }
         case CHAT_LIST_NEED_REFRESH:
             return { ...state, needRefresh: action.payload }
+        case CHAT_SCREEN:
+            return { ...state, chatScreen: action.payload }
         default:
             return state
     }

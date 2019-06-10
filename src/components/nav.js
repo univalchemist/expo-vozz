@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, Text, TouchableOpacity, Image, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, Image, StyleSheet, ImageBackground } from 'react-native';
 import { Svg } from 'expo'
 import { connect } from 'react-redux';
 import { getBottomSpace } from 'react-native-iphone-x-helper';
@@ -14,18 +14,27 @@ class Nav extends Component {
         this.state = {
             items: ['Home', 'Search', 'Messages', 'Profile'],
             selectedIndex: this.props.tabIndex,
+            totalUnRead: this.props.totalUnRead
         };
+    }
+    componentWillReceiveProps(nextProps) {
+        if (nextProps.totalUnRead !== this.props.totalUnRead) {
+
+            this.setState({
+                totalUnRead: nextProps.totalUnRead
+            });
+        }
     }
     onTapItem = (index) => {
         const { items } = this.state;
         this.props.navigation.navigate(items[index]);
         // this.props.updateTabIndex(index)
         this.props.dispatch(updateTabIndex(index));
-        this.setState({selectedIndex: index});
+        this.setState({ selectedIndex: index });
     }
 
     render() {
-        const { selectedIndex } = this.state;
+        const { selectedIndex, totalUnRead } = this.state;
         return (
             <View style={[styles.shadow, styles.tabContainer]}>
                 <TouchableOpacity onPress={() => this.onTapItem(0)} style={{ width: DEVICE.WIDTH / 5, height: 45, alignItems: 'center', justifyContent: 'center' }}>
@@ -53,9 +62,18 @@ class Nav extends Component {
 
                 </View>
                 <TouchableOpacity onPress={() => this.onTapItem(2)} style={{ width: DEVICE.WIDTH / 5, height: 45, alignItems: 'center', justifyContent: 'center' }}>
-                    <Image style={{ width: 22, height: 22 }}
+                    <ImageBackground style={{ width: 22, height: 22 }}
                         source={require('../../assets/chaticon.png')}
-                    />
+                    >
+                        {totalUnRead != null && totalUnRead > 0 &&
+                            <View style={{ backgroundColor: 'red', position: 'absolute', right: -7.5, top: -7.5, width: 15, height: 15, borderRadius: 7.5, justifyContent: 'center', alignItems: 'center' }}>
+                                <Text style={{ color: 'white', fontSize: 9 }}>
+                                    {totalUnRead}
+                                </Text>
+                            </View>
+                        }
+                    </ImageBackground>
+
                     {selectedIndex == 2 && <Text style={{ color: 'white', fontFamily: FONT.MEDIUM }}>Chat</Text>}
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => this.onTapItem(3)} style={{ width: DEVICE.WIDTH / 5, height: 45, alignItems: 'center', justifyContent: 'center' }}>
@@ -87,6 +105,7 @@ const styles = StyleSheet.create({
     }
 })
 const mapStateToProps = (state) => ({
-    tabIndex: state.tabIndex.index
+    tabIndex: state.tabIndex.index,
+    totalUnRead: state.messages.totalUnRead
 });
 export default connect(mapStateToProps)(Nav)

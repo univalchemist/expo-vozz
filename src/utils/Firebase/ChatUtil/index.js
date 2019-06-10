@@ -40,11 +40,9 @@ class Backend {
     setRef(sender, user) {
         this.messagesRef = firebase.database().ref('messages').child(sender._id).child(user._id);
         this.receiver_messagesRef = firebase.database().ref('messages').child(user._id).child(sender._id);
-        this.senderRef = firebase.database().ref('users').child(sender._id).child(user._id);
-        this.receiverRef = firebase.database().ref('users').child(user._id).child(sender._id);
     }
     setChatListRef(id) {
-        this.chatListRef = firebase.database().ref('users').child(id);
+        this.chatListRef = firebase.database().ref('messages').child(id);
     }
     // retrieve the messages from the Backend
     loadMessages(callback) {
@@ -55,13 +53,16 @@ class Backend {
                 _id: data.key,
                 text: message.text,
                 createdAt: new Date(message.createdAt),
+                sent: message.sent,
+                received: message.received,
                 user: {
                     _id: message.user._id,
                     name: message.user.name,
                 },
             });
         };
-        this.messagesRef.limitToLast(20).on('child_added', onReceive);
+        // this.messagesRef.on('child_added', onReceive);
+        this.messagesRef.limitToLast(50).on('child_added', onReceive);
     }
     // send the message to the Backend
     sendMessage(message) {
@@ -69,43 +70,23 @@ class Backend {
             this.messagesRef.push({
                 text: message[i].text,
                 user: message[i].user,
+                sent: true,
+                received: false,
                 createdAt: firebase.database.ServerValue.TIMESTAMP,
             });
             this.receiver_messagesRef.push({
                 text: message[i].text,
                 user: message[i].user,
+                sent: true,
+                received: false,
                 createdAt: firebase.database.ServerValue.TIMESTAMP,
-            });
-            this.receiverRef.update({
-                last: {
-                    message: message[i].text,
-                    updatedAt: firebase.database.ServerValue.TIMESTAMP,
-                    received: false
-                },
-            });
-            this.senderRef.update({
-                last: {
-                    message: message[i].text,
-                    updatedAt: firebase.database.ServerValue.TIMESTAMP,
-                    received: true
-                },
             });
         }
     }
-    updateMsgStatus(sender_id, user_id) {
-        const ref = firebase.database().ref('users').child(sender_id).child(user_id);
-        ref.once('value', snapshot => {
-            const message = snapshot.val()
-            if (message == null || message.last == null || message.last.received == true) {
-                return;
-            }
-            ref.update({
-                last: {
-                    message: message.last.message,
-                    updatedAt: firebase.database.ServerValue.TIMESTAMP,
-                    received: true
-                },
-            });
+    updateMsgStatus(sender_id, user_id, msgId) {
+        const ref = firebase.database().ref('messages').child(sender_id).child(user_id).child(msgId);
+        ref.update({
+            received: true
         });
     }
     // close the connection to the Backend
@@ -119,12 +100,24 @@ class Backend {
         this.chatListRef.off();
         const onReceive = (snapshot) => {
             const keys = [];
+            let totalUnRead = 0;
             snapshot.forEach(function (childSnap) {
-                keys.push(childSnap.key);
+                const messages = [];
+                let unRead = 0;
+                childSnap.forEach(function (messageSnap) {
+                    const message = messageSnap.val();
+                    if (!message.received && message.user._id != snapshot.key) {
+                        unRead = unRead + 1;
+                    }
+                    messages.push({ key: messageSnap.key, message: message });
+                })
+                totalUnRead = totalUnRead + unRead;
+                keys.push({ key: childSnap.key, messages: messages, unRead: unRead });
             });
-            dispatch(fetchChatList({ chatList: snapshot.val(), chatListKeys: keys }));
+            // dispatch(fetchChatList({ chatList: snapshot.val(), chatListKeys: keys }));
+            dispatch(fetchChatList({ chatListKeys: keys, totalUnRead: totalUnRead }));
         };
-        this.chatListRef.on('value', onReceive);
+        this.chatListRef.limitToLast(50).on('value', onReceive);
     }
     closeUSersConnection() {
         if (this.chatListRef) {

@@ -21,7 +21,7 @@ import Backend from '../../../utils/Firebase/ChatUtil';
 import { withApollo } from 'react-apollo';
 import _ from 'lodash';
 import { sendNotification } from '../../../utils/API/notification';
-import { sendNotificationToUser } from '../../../actions';
+import { sendNotificationToUser, updateChatScreenState } from '../../../actions';
 
 class Chat extends Component {
     constructor(props) {
@@ -53,8 +53,7 @@ class Chat extends Component {
     _isMounted = false;
     async componentWillMount() {
         this._isMounted = true;
-        const { user, sender } = this.state;
-        Backend.updateMsgStatus(sender._id, user._id)
+        this.props.dispatch(updateChatScreenState(true));
     }
     componentDidMount() {
         Backend.loadMessages((message) => {
@@ -63,14 +62,18 @@ class Chat extends Component {
                     messages: GiftedChat.append(previousState.messages, message),
                 };
             });
+            console.log({message})
+            if(message.user._id != this.props.auth.user._id) {
+                Backend.updateMsgStatus(this.props.auth.user._id, message.user._id, message._id)
+            }
 
         });
     }
     componentWillUnmount() {
         const { user, sender } = this.state;
         this._isMounted = false;
-        Backend.updateMsgStatus(sender._id, user._id)
         Backend.closeChat();
+        this.props.dispatch(updateChatScreenState(false));
     }
     onLoadEarlier = () => {
         this.setState((previousState) => {
